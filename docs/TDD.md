@@ -246,3 +246,4 @@ I also clicked through the whole flow in a headless browser: book the last villa
 - The in-memory rate limit isn't shared across serverless instances.
 - Booking reference links are unguessable (about 887 million combinations) but not tied to the guest's identity. A production build would add a short email verification step before showing booking details.
 - The photographs are unlicensed stand-ins and must be replaced before launch [A12].
+- `npm audit` still lists PostCSS and sharp, which ship inside Next.js 15. Here they only process the project's own CSS and image files, never user uploads; the fix is the Next.js 16 upgrade.

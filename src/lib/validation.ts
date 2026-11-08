@@ -21,7 +21,7 @@ export const holdSchema = quoteSchema.extend({
   guestEmail: trimmed(120).toLowerCase().email("Please enter a valid email"),
   guestPhone: trimmed(20).regex(/^\+?[0-9][0-9\s-]{7,16}$/, "Please enter a valid phone number"),
   requests: trimmed(500).optional(),
-  consent: z.literal(true, { errorMap: () => ({ message: "Please agree to how we use your details" }) }),
+  consent: z.literal(true, { error: "Please agree to how we use your details" }),
 });
 
 export const paymentSchema = z.object({
@@ -38,7 +38,7 @@ export const enquirySchema = z.object({
   guests: z.coerce.number().int().min(1).max(2000).optional(),
   budget: trimmed(40).optional(),
   message: trimmed(2000).min(5, "Tell us a little about your plans"),
-  consent: z.literal(true, { errorMap: () => ({ message: "Please agree to how we use your details" }) }),
+  consent: z.literal(true, { error: "Please agree to how we use your details" }),
   website: z.string().max(0).optional(),
 });
 
