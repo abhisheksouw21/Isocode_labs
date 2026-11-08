@@ -1,7 +1,9 @@
+import { CircleCheck, IdCard, Phone } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { PriceBreakdown } from "@/components/PriceBreakdown";
+import { CONTACT } from "@/components/site/contact";
 import { getBookingByRef } from "@/lib/booking";
 import { formatDate } from "@/lib/dates";
 import type { Quote } from "@/lib/pricing";
@@ -15,6 +17,8 @@ function maskEmail(email: string) {
   return `${user.slice(0, 2)}${"•".repeat(Math.max(1, user.length - 2))}@${domain}`;
 }
 
+const LONG: Intl.DateTimeFormatOptions = { weekday: "long", day: "numeric", month: "long", year: "numeric" };
+
 export default async function ConfirmationPage({ params }: { params: Promise<{ ref: string }> }) {
   const { ref } = await params;
   const row = await getBookingByRef(ref);
@@ -23,54 +27,72 @@ export default async function ConfirmationPage({ params }: { params: Promise<{ r
   if (booking.status !== "CONFIRMED") redirect(`/book/${ref}`);
 
   return (
-    <div className="mx-auto max-w-3xl px-4 py-10 sm:px-6">
-      <div className="text-center">
-        <p className="mx-auto flex size-12 items-center justify-center rounded-full bg-estate text-xl text-white">✓</p>
-        <h1 className="mt-4 text-3xl sm:text-4xl">You&apos;re booked, {booking.guestName.split(" ")[0]}</h1>
-        <p className="mt-2 text-muted">
-          Reference <span className="font-medium text-ink">{booking.ref}</span> · confirmation for {maskEmail(booking.guestEmail)}
-        </p>
-      </div>
+    <div className="wrap max-w-4xl py-10 sm:py-14">
+      <p className="inline-flex items-center gap-2 font-semibold text-ok">
+        <CircleCheck className="size-5" aria-hidden /> Booking confirmed
+      </p>
+      <h1 className="mt-2 text-5xl sm:text-6xl">See you on {formatDate(booking.checkIn, { day: "numeric", month: "long" })}, {booking.guestName.split(" ")[0]}</h1>
+      <p className="mt-4 text-lg">
+        Booking reference <span className="font-semibold">{booking.ref}</span>, for {maskEmail(booking.guestEmail)}.
+      </p>
 
-      <div className="card mt-8 overflow-hidden">
-        <div className="relative aspect-[5/2] bg-sand">
-          <Image src={room.images[0]} alt={room.name} fill sizes="768px" className="object-cover" />
+      <div className="mt-10 grid overflow-hidden border border-line bg-surface sm:grid-cols-2">
+        <div className="relative aspect-[4/3] bg-leaf sm:aspect-auto">
+          <Image src={room.images[0]} alt="" fill sizes="(min-width: 640px) 450px, 100vw" className="object-cover" />
         </div>
-        <div className="grid gap-6 p-6 sm:grid-cols-2">
-          <div className="space-y-3 text-sm">
-            <p className="font-display text-xl">{room.name}</p>
+        <div className="p-6">
+          <p className="font-display text-2xl">{room.name}</p>
+          <dl className="mt-4 space-y-3">
             <div>
-              <p className="text-muted">Check-in</p>
-              <p>
-                {formatDate(booking.checkIn, { weekday: "long", day: "numeric", month: "long", year: "numeric" })} from {RESORT.checkInTime}
-              </p>
+              <dt className="text-sm text-muted">Check-in</dt>
+              <dd>
+                {formatDate(booking.checkIn, LONG)}, from {RESORT.checkInTime}
+              </dd>
             </div>
             <div>
-              <p className="text-muted">Check-out</p>
-              <p>
-                {formatDate(booking.checkOut, { weekday: "long", day: "numeric", month: "long", year: "numeric" })} by {RESORT.checkOutTime}
-              </p>
+              <dt className="text-sm text-muted">Check-out</dt>
+              <dd>
+                {formatDate(booking.checkOut, LONG)}, by {RESORT.checkOutTime}
+              </dd>
             </div>
-            <p className="text-muted">
-              {booking.adults} adult{booking.adults > 1 ? "s" : ""}
-              {booking.children ? `, ${booking.children} child${booking.children > 1 ? "ren" : ""}` : ""} · {plan.name}
-            </p>
-          </div>
-          <div>
-            <PriceBreakdown quote={booking.breakdown as Quote} promoCode={booking.promoCode} />
-            <p className="mt-2 text-xs text-muted">Paid in full (test mode). {plan.refundable ? "Free cancellation up to 72 hours before arrival." : "Non-refundable rate."}</p>
-          </div>
+            <div>
+              <dt className="text-sm text-muted">Guests and rate</dt>
+              <dd>
+                {booking.adults} adult{booking.adults > 1 ? "s" : ""}
+                {booking.children ? `, ${booking.children} child${booking.children > 1 ? "ren" : ""}` : ""}, {plan.name}
+              </dd>
+            </div>
+          </dl>
         </div>
       </div>
 
-      <div className="mt-6 rounded-xl border border-line bg-sand/50 p-4 text-sm leading-relaxed text-muted">
-        Please bring a photo ID for each adult. Foreign nationals will complete Form C with their passport and visa at check-in. Questions? Call {RESORT.phone} and quote your reference.
+      <div className="mt-6 grid gap-6 sm:grid-cols-2">
+        <div className="panel p-5">
+          <PriceBreakdown quote={booking.breakdown as Quote} promoCode={booking.promoCode} />
+          <p className="mt-3 text-sm text-muted">
+            Paid in full with the test gateway. {plan.refundable ? "Free cancellation up to 72 hours before arrival." : "This rate is non-refundable."}
+          </p>
+        </div>
+        <div className="space-y-4 rounded-[var(--radius-ui)] bg-leaf p-5">
+          <p className="flex gap-3">
+            <IdCard className="mt-0.5 size-5 shrink-0" aria-hidden />
+            <span>Bring a photo ID for each adult. Guests from abroad fill in Form C with their passport at the front desk.</span>
+          </p>
+          <p className="flex gap-3">
+            <Phone className="mt-0.5 size-5 shrink-0" aria-hidden />
+            <span>
+              Questions before you arrive?{" "}
+              <a href={CONTACT.tel} className="link">
+                Call {CONTACT.phoneLabel}
+              </a>{" "}
+              and give your booking reference.
+            </span>
+          </p>
+        </div>
       </div>
-      <div className="mt-8 text-center">
-        <Link href="/" className="btn-ghost">
-          Back to the estate
-        </Link>
-      </div>
+      <Link href="/" className="btn-ghost mt-10">
+        Back to the estate
+      </Link>
     </div>
   );
 }
