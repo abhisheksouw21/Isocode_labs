@@ -3,7 +3,7 @@
 Kaapi Hills Estate: a direct-booking site and enquiry inbox for Company A, built as one Next.js app with Postgres.
 
 - **Repository:** https://github.com/abhisheksouw21/Isocode_labs
-- **Live app:** `<add your Vercel URL>`
+- **Live app:** https://resort-direct-6hjk.vercel.app
 
 ## Demo logins
 
@@ -67,7 +67,7 @@ npm run typecheck && npm run lint
 
 ## How it is deployed
 
-- **App:** Vercel, Next.js preset. The build command is `npm run vercel-build`, which applies migrations and then runs `next build`.
+- **App:** Vercel, Next.js preset, project root at the top of the repo. The build command is `npm run vercel-build`, which applies migrations and then runs `next build`.
 - **Database:** Neon Postgres (free tier). Use the pooled connection string with `?sslmode=require`.
 - **Cron:** `vercel.json` calls `/api/cron/release-holds` once a day. It releases stale holds and deletes enquiries past their retention date. Holds are also released on every search and booking, so the app doesn't depend on the cron.
 

@@ -2,9 +2,9 @@
 
 ## Kaapi Hills Estate: direct booking and AI enquiry routing
 
-**GitHub:** `<add your GitHub URL>`
+**GitHub:** https://github.com/abhisheksouw21/Isocode_labs
 
-**Live app:** `<add your Vercel URL>`
+**Live app:** https://resort-direct-6hjk.vercel.app
 
 **Brief:** Problem 5, the hill resort's direct-booking website with AI enquiry routing (Company A, Chikkamagaluru)
 
@@ -170,30 +170,31 @@ GST is chosen **per night** from the `tax_slabs` table by that night's tariff, *
 
 ## 9. UI and design decisions
 
-The brief asks for minimal design that sells the experience: large photos, a quiet layout, and booking in three steps or fewer.
+The brief asks for minimal design that sells the experience: large photos, a quiet layout, and booking in three steps or fewer. The full plan is in `docs/design/redesign-plan.md`.
 
-- **Palette and type:** an estate green, warm paper and sand neutrals, and one clay accent used only for scarcity ("Only 1 left"). Headings use a classic serif and body text a system sans. System fonts mean no font download, which matters on slow networks.
-- **Home:** a full-bleed photo, then the date search overlapping it, so the first thing a guest can do is check dates. Room cards show the **average nightly price including GST** for the chosen dates. Unavailable rooms explain why ("Sleeps up to 3", "Sold out", "Closed on some nights") instead of disappearing.
-- **Room page:** a large gallery, then the rate plans, each with its full price breakdown. The nightly rates sit behind a disclosure to keep the page calm.
-- **Booking:** three numbered steps. The details step asks for only four things, says plainly "No ID needed online", and keeps the price summary visible. The payment step shows a hold countdown, and test mode is labelled honestly.
+- **Palette:** taken from the estate in the monsoon. A cool mist ground (`#E6EBE5`), near-black canopy green for text, a deep canopy green for the one button style, and the ripe coffee cherry (`#9A2335`) used only in the hero and for scarcity ("1 left"). Status colours always come with an icon and a word, never colour alone.
+- **Type:** Bricolage Grotesque for headings, whose slightly hand-cut letters recall painted estate signs, and Albert Sans for text, which includes the ₹ sign. Both are subset to Latin plus ₹ and bundled with `next/font/local` (68 KB in total), so every phone renders the same letters, offline included.
+- **Home:** a split hero. The date search is set as one sentence on a canopy panel ("Stay from [20 Nov] to [22 Nov] for [2 adults] and [0 children]"), with the estate photograph beside it. It's a plain GET form, so it works before JavaScript loads. Below it: one featured room and a grid of the rest, each showing the **average nightly price including GST** for the chosen dates. Unavailable rooms explain why ("Sleeps up to 3", "Sold out", "Closed on some nights") instead of disappearing. Then the location, the three rate plans (from the database) and the event spaces. No reviews, ratings or invented facts.
+- **Phone:** a sticky bar with Call, WhatsApp and Book a room, and a full-screen menu built on `<details>` that opens without JavaScript.
+- **Room page:** a swipeable gallery on a phone and a three-photo grid on desktop, both opening a lightbox. Then the rate plans, each with its full price breakdown. The nightly rates sit behind a disclosure to keep the page calm.
+- **Booking:** three numbered steps. The details step asks for only four things, says plainly "No ID needed online", and shows errors beside each field (linked with `aria-describedby`). On a phone the price summary collapses to the top and the total stays in a sticky bar with Continue. The payment step shows a hold countdown that screen readers hear only at 5 min, 2 min, 1 min, 30 s and 0, and test mode is labelled honestly.
 - **Inbox:** the list on the left and the selected enquiry on the right; one column on a phone. Each row shows channel, lane, owner and a confidence bar with the threshold tick, so staff see at a glance why something went to Unsorted. Complaint alerts sit in a banner above everything for the GM.
-- **Rates grid:** room types by 14 nights. Each cell reads "₹19.0k · 2/2", with full nights shaded and blackouts dark. Click a cell to edit it, or bulk-edit a range on chosen weekdays.
-- **States:** every list has an empty state, pages have skeleton loading states, and errors are written for the reader ("This room just sold out for these dates").
+- **Rates grid:** room types by 14 nights. Each cell shows the rate and sold/allotment, with full nights shaded and blackouts dark. Click a cell to edit it, or bulk-edit a range on chosen weekdays.
+- **States:** every list has an empty state, staff pages have a loading state, and errors are written for the reader ("This room just sold out for these dates").
+- **Accessibility floor:** text contrast of 4.5:1 or more, 44px touch targets, visible keyboard focus, and `prefers-reduced-motion` respected (the hero's mist band rests). axe-core reports no violations on any guest or staff page at 375px and 1280px, and no page scrolls sideways at 375px.
 
-**Images:** the brief gives no photos, so the site uses stand-in photographs of coffee estates, hills and resort interiors, laid out in portrait frames. They are served through `next/image` with explicit sizes, lazy loading and AVIF/WebP, and every photo has written alt text. They were collected from the web without a cleared licence, and a footer line marks them as stand-ins. **Assumption [A12]:** the resort supplies its own photography before launch; each file is replaced under the same name in `public/`.
+**Images:** the brief gives no photos, so the site uses stand-in photographs of coffee estates, hills and resort interiors, laid out in portrait frames so none is stretched past its source. They are served through `next/image` with explicit sizes, lazy loading and AVIF/WebP, and every photo has written alt text. They were collected from the web without a cleared licence, and a footer line marks them as stand-ins. **Assumption [A12]:** the resort supplies its own photography before launch; each file is replaced under the same name in `public/`.
 
 ## 10. Performance
 
-Lighthouse, mobile, simulated slow 4G on the production build:
+Lighthouse, mobile, simulated slow 4G, on the production build with the stand-in photographs:
 
-| Page | Performance | Accessibility | Best practices | SEO | LCP | CLS | Total weight |
-| --- | --- | --- | --- | --- | --- | --- | --- |
-| Home | 86 | 100 | 100 | 100 | 2.4 s | 0 | 179 KiB |
-| Room page | 96 | 100 | 100 | 91* | 2.2 s | 0 | 144 KiB |
+| Page | Performance | Accessibility | Best practices | SEO |
+| --- | --- | --- | --- | --- |
+| Home | 85 | 100 | 100 | 100 |
+| Room page | 93 | 100 | 100 | 100 |
 
-\*The room page has a meta description, but Next.js 15 streams metadata for dynamic pages after the head for normal browsers, and Lighthouse only looks in the head. Search-engine crawlers get it in the head.
-
-Contributing factors: server-rendered HTML, AVIF/WebP images with explicit sizes, no web fonts, no client-side data fetching for browsing, and about 102 KB of shared JS. The main remaining cost on the home page is React hydration (TBT 450 ms on a throttled CPU).
+The home page carries about 690 KB, most of it photographs that `next/image` resizes for each screen width. Contributing factors: server-rendered HTML, AVIF/WebP images with explicit sizes, two small self-hosted font files, no client-side data fetching for browsing, and about 102 KB of shared JS. The resort's own photographs, compressed for the web, would be the next gain; the main remaining cost after that is React hydration on a throttled CPU.
 
 ## 11. Testing
 
