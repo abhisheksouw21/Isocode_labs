@@ -13,7 +13,7 @@ export const dynamic = "force-dynamic";
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const room = await getRoomBySlug((await params).slug);
-  return { title: room?.name ?? "Room" };
+  return { title: room?.name ?? "Room", description: room ? `${room.tagline}. ${room.sizeSqm} m², sleeps ${room.maxGuests}. Book direct for the best rate.` : undefined };
 }
 
 export default async function RoomPage({

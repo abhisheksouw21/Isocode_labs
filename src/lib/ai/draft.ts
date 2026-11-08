@@ -112,7 +112,7 @@ const CLOSING: Record<CategoryLabel, string> = {
   ROOM: "You can also book directly on our website for the best available rate. Just reply here if you'd like us to hold a room for you.",
   WEDDING: "Once we have these details, our events team will send a tailored proposal with menus and room blocks.",
   OFFSITE: "Once we have these details, we'll send a full proposal covering rooms, meals and meeting space.",
-  COMPLAINT: "Our General Manager has been informed and will personally follow up with you today.",
+  COMPLAINT: "I am looking into this personally and will come back to you today with what we will do to put it right.",
 };
 
 export async function composeDraft(ctx: Ctx): Promise<DraftResult> {

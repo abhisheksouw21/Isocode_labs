@@ -9,7 +9,7 @@ export const metadata = { robots: { index: false } };
 export default async function StaffLayout({ children }: { children: React.ReactNode }) {
   const session = await requireStaffPage();
   const counts = await laneCounts();
-  const alerts = counts.reduce((a, c) => a + c.alerts, 0);
+  const alerts = session.role === "GM" ? counts.reduce((a, c) => a + c.alerts, 0) : 0;
   const open = counts.reduce((a, c) => a + c.open, 0);
   return (
     <div className="min-h-dvh bg-paper">
