@@ -3,6 +3,7 @@
 import { ChevronLeft, ChevronRight, Expand, X } from "lucide-react";
 import Image from "next/image";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { photoAlt } from "./site/photos";
 
 type Props = { images: string[]; name: string };
 
@@ -36,15 +37,15 @@ export function Gallery({ images, name }: Props) {
   const strip = useRef<HTMLDivElement>(null);
   const { index } = useSnapIndex(strip);
   const [open, setOpen] = useState<number | null>(null);
-  const alt = (i: number) => `${name}, picture ${i + 1} of ${images.length}`;
+  const alt = (i: number) => photoAlt(images[i], `${name}, picture ${i + 1} of ${images.length}`);
 
   return (
     <div>
       <div className="relative sm:hidden">
         <div ref={strip} className="-mx-5 flex snap-x snap-mandatory overflow-x-auto [scrollbar-width:none]" aria-label={`${name} pictures`} tabIndex={0} role="region">
           {images.map((src, i) => (
-            <button key={src} type="button" onClick={() => setOpen(i)} className="relative aspect-[4/3] w-full shrink-0 snap-center bg-leaf" aria-label={`Open ${alt(i)}`}>
-              <Image src={src} alt={alt(i)} fill sizes="100vw" className="object-cover" priority={i === 0} />
+            <button key={src} type="button" onClick={() => setOpen(i)} className="relative aspect-[4/5] w-full shrink-0 snap-center bg-leaf" aria-label={`Open picture ${i + 1} of ${images.length}: ${alt(i)}`}>
+              <Image src={src} alt="" fill sizes="100vw" className="object-cover" priority={i === 0} />
             </button>
           ))}
         </div>
@@ -53,20 +54,20 @@ export function Gallery({ images, name }: Props) {
         </p>
       </div>
 
-      <div className="hidden gap-3 sm:grid sm:grid-cols-3 sm:grid-rows-2">
-        {images.map((src, i) => (
+      <div className="hidden gap-3 sm:grid sm:grid-cols-3">
+        {images.slice(0, 3).map((src, i) => (
           <button
             key={src}
             type="button"
             onClick={() => setOpen(i)}
-            className={`group relative overflow-hidden bg-leaf ${i === 0 ? "col-span-2 row-span-2 min-h-[440px]" : "aspect-[3/2]"} ${i > 2 ? "hidden" : ""}`}
-            aria-label={`Open ${alt(i)}`}
+            className="group relative aspect-[3/4] overflow-hidden bg-leaf"
+            aria-label={`Open picture ${i + 1} of ${images.length}: ${alt(i)}`}
           >
-            <Image src={src} alt={alt(i)} fill sizes={i === 0 ? "66vw" : "33vw"} className="object-cover transition-transform duration-500 group-hover:scale-[1.025]" priority={i === 0} />
+            <Image src={src} alt="" fill sizes="(min-width: 1200px) 390px, 33vw" className="object-cover transition-transform duration-500 group-hover:scale-[1.025]" priority={i === 0} />
           </button>
         ))}
       </div>
-      <button type="button" onClick={() => setOpen(0)} className="btn-ghost btn-sm mt-3">
+      <button type="button" onClick={() => setOpen(0)} className={`btn-ghost btn-sm mt-3 ${images.length <= 3 ? "sm:hidden" : ""}`}>
         <Expand className="size-4" aria-hidden />
         See all {images.length} pictures
       </button>
@@ -119,7 +120,7 @@ function Lightbox({ images, start, name, onClose }: { images: string[]; start: n
         <div ref={track} className="flex flex-1 snap-x snap-mandatory overflow-x-auto [scrollbar-width:none]">
           {images.map((src, i) => (
             <div key={src} className="relative h-full w-full shrink-0 snap-center">
-              <Image src={src} alt={`${name}, picture ${i + 1} of ${images.length}`} fill sizes="100vw" className="object-contain" />
+              <Image src={src} alt={photoAlt(src, `${name}, picture ${i + 1} of ${images.length}`)} fill sizes="100vw" className="object-contain" />
             </div>
           ))}
         </div>

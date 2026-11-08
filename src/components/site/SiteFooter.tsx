@@ -50,6 +50,7 @@ export function SiteFooter() {
           </ul>
         </div>
       </div>
+      <p className="wrap border-t border-mist/20 py-5 text-sm text-mist/80">Photographs are stand-ins until the estate&apos;s own photography is ready.</p>
     </footer>
   );
 }

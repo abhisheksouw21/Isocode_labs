@@ -4,6 +4,7 @@ import Link from "next/link";
 import { RoomCard } from "@/components/RoomCard";
 import { ActionBar } from "@/components/site/ActionBar";
 import { CONTACT } from "@/components/site/contact";
+import { photoAlt } from "@/components/site/photos";
 import { WhatsAppIcon } from "@/components/site/WhatsAppIcon";
 import { StaySearch } from "@/components/StaySearch";
 import { StatusNote } from "@/components/StatusNote";
@@ -42,17 +43,17 @@ export default async function Home({ searchParams }: { searchParams: Promise<Rec
 
   return (
     <>
-      <section aria-labelledby="hero-title" className="relative isolate bg-canopy lg:min-h-[calc(100svh-4rem)]">
-        <div className="relative h-[30svh] min-h-52 overflow-hidden lg:absolute lg:inset-0 lg:h-auto">
-          <Image src="/hero.webp" alt="Mist settling over the coffee estate at dawn" fill priority sizes="100vw" className="object-cover" />
+      <section aria-labelledby="hero-title" className="grid bg-canopy lg:min-h-[calc(100svh-4rem)] lg:grid-cols-[minmax(0,1fr)_minmax(0,40%)]">
+        <div className="relative h-[46svh] min-h-72 overflow-hidden lg:order-last lg:h-auto">
+          <Image src="/hero.webp" alt={photoAlt("/hero.webp", "The coffee estate")} fill priority sizes="(min-width: 1024px) 40vw, 100vw" className="object-cover object-[50%_35%]" />
           <div
             aria-hidden
-            className="motion-hide pointer-events-none absolute inset-y-0 -left-1/4 w-[150%] animate-mist bg-[linear-gradient(90deg,transparent,rgba(240,244,239,0.75)_45%,rgba(240,244,239,0.75)_55%,transparent)]"
+            className="motion-hide pointer-events-none absolute inset-y-0 -left-1/4 w-[150%] animate-mist bg-[linear-gradient(90deg,transparent,rgba(240,244,239,0.6)_45%,rgba(240,244,239,0.6)_55%,transparent)]"
           />
         </div>
-        <div className="wrap relative lg:flex lg:min-h-[calc(100svh-4rem)] lg:items-end lg:pb-14">
-          <div className="animate-enter bg-canopy py-9 lg:max-w-[46rem] lg:px-12 lg:py-12">
-            <h1 id="hero-title" className="text-[2.35rem] text-white sm:text-5xl">
+        <div className="flex items-center px-5 py-10 sm:px-8 lg:py-16 lg:pr-14 lg:pl-[max(2rem,calc((100vw-1200px)/2+2rem))]">
+          <div className="animate-enter max-w-[44rem]">
+            <h1 id="hero-title" className="text-[2.35rem] text-white sm:text-5xl xl:text-6xl">
               Rooms and villas on a coffee estate in Chikkamagaluru
             </h1>
             <p className="mt-4 text-lg text-mist">
@@ -99,7 +100,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<Rec
             <RoomCard room={feature} avail={availFor(feature.id)} query={query} nights={nights} feature priority />
           </div>
         )}
-        <div className="mt-16 grid gap-x-8 gap-y-14 sm:grid-cols-2">
+        <div className="mt-16 grid gap-x-6 gap-y-14 sm:grid-cols-2 lg:grid-cols-4">
           {rest.map((room) => (
             <RoomCard key={room.id} room={room} avail={availFor(room.id)} query={query} nights={nights} />
           ))}
@@ -162,10 +163,10 @@ export default async function Home({ searchParams }: { searchParams: Promise<Rec
 
       <section aria-labelledby="events-title" className="bg-canopy text-mist">
         <div className="wrap grid gap-10 py-16 sm:py-24 lg:grid-cols-12 lg:items-center">
-          <div className="relative aspect-[4/3] overflow-hidden lg:col-span-6">
-            <Image src="/rooms/coffee-bungalow-villa-2.webp" alt="The estate lawns at dusk" fill sizes="(min-width: 1024px) 560px, 100vw" className="object-cover" />
+          <div className="relative aspect-[4/5] overflow-hidden lg:col-span-5">
+            <Image src="/rooms/coffee-bungalow-villa-2.webp" alt={photoAlt("/rooms/coffee-bungalow-villa-2.webp", "The estate lawns")} fill sizes="(min-width: 1024px) 460px, 100vw" className="object-cover" />
           </div>
-          <div className="lg:col-span-5 lg:col-start-8">
+          <div className="lg:col-span-6 lg:col-start-7">
             <h2 id="events-title" className="text-4xl text-white sm:text-5xl">
               Weddings and offsites on the estate
             </h2>
