@@ -1,22 +1,45 @@
 "use client";
 
+import { CircleCheck } from "lucide-react";
 import Link from "next/link";
-import { useState } from "react";
+import { useRef, useState } from "react";
+import { FieldError, fieldProps, focusFirstError, issuesToErrors, validateForm, type FieldErrors } from "./forms";
 
 const TYPES = [
-  { value: "wedding", label: "Wedding" },
-  { value: "offsite", label: "Corporate offsite" },
+  { value: "wedding", label: "A wedding" },
+  { value: "offsite", label: "A team offsite" },
   { value: "stay", label: "A stay" },
   { value: "other", label: "Something else" },
 ];
 
+const SERVER_FIELDS = { name: "name", contact: "contact", dates: "dates", guests: "guests", budget: "budget", message: "message", consent: "consent" };
+
+const CHECKS: Record<string, (el: HTMLInputElement) => string | undefined> = {
+  name: (el) => (el.value.trim().length < 2 ? "Enter your name." : undefined),
+  contact: (el) => (el.value.trim().length < 5 ? "Enter an email address or a mobile number so we can reply." : undefined),
+  guests: (el) => (el.validity.rangeUnderflow || el.validity.rangeOverflow || el.validity.badInput ? "Enter a number of guests between 1 and 2000." : undefined),
+  message: (el) => (el.value.trim().length < 5 ? "Tell us a little about your plans: what, when and for how many." : undefined),
+  consent: (el) => (el.checked ? undefined : "Tick the box so we can use these details to reply."),
+};
+
 export function EnquiryForm() {
   const [type, setType] = useState("wedding");
+  const [errors, setErrors] = useState<FieldErrors>({});
   const [state, setState] = useState<{ status: "idle" | "sending" | "sent" | "error"; message?: string }>({ status: "idle" });
+  const done = useRef<HTMLDivElement>(null);
+
+  const clear = (name: string) => errors[name] && setErrors({ ...errors, [name]: undefined });
 
   async function submit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    const f = new FormData(e.currentTarget);
+    const form = e.currentTarget;
+    const found = validateForm(form, CHECKS);
+    setErrors(found);
+    if (Object.values(found).some(Boolean)) {
+      focusFirstError(form, found);
+      return;
+    }
+    const f = new FormData(form);
     setState({ status: "sending" });
     try {
       const res = await fetch("/api/enquiries", {
@@ -35,29 +58,48 @@ export function EnquiryForm() {
         }),
       });
       const body = await res.json();
-      if (!res.ok) throw new Error(body.error);
+      if (!res.ok) {
+        const fieldErrors = issuesToErrors(body.issues, SERVER_FIELDS);
+        if (Object.values(fieldErrors).some(Boolean)) {
+          setErrors(fieldErrors);
+          focusFirstError(form, fieldErrors);
+          setState({ status: "idle" });
+        } else setState({ status: "error", message: body.error ?? "The enquiry didn't send. Try again." });
+        return;
+      }
       setState({ status: "sent", message: body.ref });
-    } catch (err) {
-      setState({ status: "error", message: err instanceof Error ? err.message : "Couldn't send. Please try again." });
+      requestAnimationFrame(() => done.current?.focus());
+    } catch {
+      setState({ status: "error", message: "No connection. Check your signal and send it again." });
     }
   }
 
   if (state.status === "sent")
     return (
-      <div className="card p-6" role="status">
-        <h2 className="text-2xl">Thank you, we have it</h2>
-        <p className="mt-2 text-sm text-muted">Your reference is {state.message}. Someone from the estate will reply to you directly.</p>
+      <div ref={done} tabIndex={-1} role="status" className="panel p-6 outline-none">
+        <p className="inline-flex items-center gap-2 font-semibold text-ok">
+          <CircleCheck className="size-5" aria-hidden /> Enquiry sent
+        </p>
+        <h2 className="mt-2 text-3xl">We have your enquiry</h2>
+        <p className="mt-2">
+          Your reference is <span className="font-semibold">{state.message}</span>. The right person on our team will reply to the email or number you gave.
+        </p>
       </div>
     );
 
   const isEvent = type === "wedding" || type === "offsite";
   return (
-    <form onSubmit={submit} className="space-y-5">
+    <form onSubmit={submit} noValidate className="space-y-6">
       <fieldset>
         <legend className="label">What are you planning?</legend>
         <div className="flex flex-wrap gap-2">
           {TYPES.map((t) => (
-            <label key={t.value} className={`cursor-pointer rounded-full border px-4 py-2 text-sm ${type === t.value ? "border-estate bg-estate text-white" : "border-line bg-white text-ink"}`}>
+            <label
+              key={t.value}
+              className={`inline-flex min-h-11 cursor-pointer items-center rounded-[var(--radius-ui)] border px-4 has-[:focus-visible]:outline-3 has-[:focus-visible]:outline-cherry ${
+                type === t.value ? "border-canopy bg-canopy text-white" : "border-field bg-white text-ink hover:bg-leaf"
+              }`}
+            >
               <input type="radio" name="type" value={t.value} checked={type === t.value} onChange={() => setType(t.value)} className="sr-only" />
               {t.label}
             </label>
@@ -65,64 +107,73 @@ export function EnquiryForm() {
         </div>
       </fieldset>
 
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="grid gap-5 sm:grid-cols-2">
         <div>
           <label htmlFor="name" className="label">
             Your name
           </label>
-          <input id="name" name="name" required minLength={2} maxLength={80} autoComplete="name" className="field" />
+          <input {...fieldProps("name", errors)} required minLength={2} maxLength={80} autoComplete="name" className="field" onInput={() => clear("name")} />
+          <FieldError id="name-error" message={errors.name} />
         </div>
         <div>
           <label htmlFor="contact" className="label">
             Email or mobile
           </label>
-          <input id="contact" name="contact" required minLength={5} maxLength={120} className="field" />
+          <input {...fieldProps("contact", errors)} required minLength={5} maxLength={120} autoComplete="email" className="field" onInput={() => clear("contact")} />
+          <FieldError id="contact-error" message={errors.contact} />
         </div>
         <div>
           <label htmlFor="dates" className="label">
-            Dates {isEvent ? "or month" : ""}
+            {isEvent ? "Dates or month (optional)" : "Dates (optional)"}
           </label>
-          <input id="dates" name="dates" maxLength={80} placeholder={isEvent ? "e.g. Feb 2027" : "e.g. 14–16 Nov"} className="field" />
+          <input {...fieldProps("dates", errors)} maxLength={80} placeholder={isEvent ? "February 2027" : "14 to 16 November"} className="field" />
+          <FieldError id="dates-error" message={errors.dates} />
         </div>
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label htmlFor="guests" className="label">
-              Guests
+              Guests (optional)
             </label>
-            <input id="guests" name="guests" type="number" min={1} max={2000} className="field" />
+            <input {...fieldProps("guests", errors)} type="number" min={1} max={2000} inputMode="numeric" className="field" onInput={() => clear("guests")} />
+            <FieldError id="guests-error" message={errors.guests} />
           </div>
           <div>
             <label htmlFor="budget" className="label">
-              Budget
+              Budget (optional)
             </label>
-            <input id="budget" name="budget" maxLength={40} placeholder="₹" className="field" />
+            <input {...fieldProps("budget", errors)} maxLength={40} placeholder="₹" className="field" />
+            <FieldError id="budget-error" message={errors.budget} />
           </div>
         </div>
         <div className="sm:col-span-2">
           <label htmlFor="message" className="label">
-            Tell us more
+            Your plans
           </label>
-          <textarea id="message" name="message" required minLength={5} maxLength={2000} rows={5} className="field" />
+          <textarea {...fieldProps("message", errors)} required minLength={5} maxLength={2000} rows={5} className="field" onInput={() => clear("message")} />
+          <FieldError id="message-error" message={errors.message} />
         </div>
       </div>
       <input name="website" tabIndex={-1} autoComplete="off" className="hidden" aria-hidden />
 
-      <label className="flex items-start gap-3 text-sm">
-        <input type="checkbox" name="consent" required className="mt-0.5 size-4 accent-estate" />
-        <span className="text-muted">
-          I agree that the estate may use these details to reply to my enquiry. Enquiries are deleted after 6 months unless they become a booking.{" "}
-          <Link href="/privacy" target="_blank" className="text-estate underline underline-offset-4">
-            Privacy notice
-          </Link>
-        </span>
-      </label>
+      <div>
+        <div className="flex items-start gap-3">
+          <input {...fieldProps("consent", errors)} type="checkbox" required className="mt-1 size-5 shrink-0 accent-canopy" onChange={() => clear("consent")} />
+          <label htmlFor="consent">
+            I agree that the estate uses these details to reply to this enquiry. Enquiries that don&apos;t become a booking are deleted after 6 months.{" "}
+            <Link href="/privacy" target="_blank" className="link">
+              Privacy notice
+            </Link>
+          </label>
+        </div>
+        <FieldError id="consent-error" message={errors.consent} />
+      </div>
 
       {state.status === "error" && (
-        <p className="rounded-xl border border-alert/30 bg-alert/5 px-4 py-3 text-sm text-alert" role="alert">
+        <p role="alert" className="rounded-[var(--radius-ui)] bg-alert-tint px-4 py-3 text-alert">
           {state.message}
         </p>
       )}
-      <button type="submit" disabled={state.status === "sending"} className="btn-primary px-8 py-3">
+      <button type="submit" disabled={state.status === "sending"} className="btn-primary w-full px-8 py-3 sm:w-auto">
         {state.status === "sending" ? "Sending…" : "Send enquiry"}
       </button>
     </form>
