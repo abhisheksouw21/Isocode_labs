@@ -1,30 +1,72 @@
 @import "tailwindcss";
 
+/*
+ * Palette: the estate in the monsoon. Mist on the hills (ground), the shade
+ * canopy over the coffee (ink, buttons), the ripe cherry (one accent, used in
+ * the hero moment and for scarcity only). See docs/design/redesign-plan.md.
+ */
 @theme {
-  --color-paper: #f7f5f0;
-  --color-sand: #ece6da;
-  --color-line: #ddd6c8;
-  --color-ink: #1d2620;
-  --color-muted: #5d6a61;
-  --color-estate: #2f4a36;
-  --color-estate-dark: #233829;
-  --color-moss: #55755e;
-  --color-clay: #9a5b3c;
-  --color-alert: #a6372b;
-  --color-warn: #8a6414;
-  --color-ok: #2f6b45;
-  --font-serif: "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif;
-  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --color-mist: #e6ebe5;
+  --color-surface: #f8faf6;
+  --color-leaf: #d5e0d5;
+  --color-ink: #17301f;
+  --color-muted: #4a5e50;
+  --color-line: #c5d0c6;
+  --color-field: #7d8c80;
+  --color-canopy: #1f3d2b;
+  --color-canopy-deep: #132a1d;
+  --color-cherry: #9a2335;
+  --color-ok: #245f3b;
+  --color-warn: #7a5600;
+  --color-alert: #af2a1e;
+  --color-ok-tint: #dcebdf;
+  --color-warn-tint: #f3ead2;
+  --color-alert-tint: #f6e1dd;
+
+  --font-display: var(--font-bricolage), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-albert), ui-sans-serif, system-ui, sans-serif;
+
+  --text-xs: 0.75rem;
+  --text-xs--line-height: 1.4;
+  --radius-ui: 6px;
+
+  --animate-mist: mist-drift 2.4s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+  --animate-enter: enter 0.6s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+}
+
+@keyframes mist-drift {
+  from {
+    transform: translateX(-35%);
+    opacity: 0.85;
+  }
+  to {
+    transform: translateX(35%);
+    opacity: 0;
+  }
+}
+
+@keyframes enter {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
 }
 
 html {
   -webkit-text-size-adjust: 100%;
+  scroll-padding-top: 5rem;
 }
 
 body {
-  background: var(--color-paper);
+  background: var(--color-mist);
   color: var(--color-ink);
   font-family: var(--font-sans);
+  font-size: 1rem;
+  line-height: 1.55;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -32,43 +74,83 @@ h1,
 h2,
 h3,
 .font-display {
-  font-family: var(--font-serif);
-  letter-spacing: -0.01em;
+  font-family: var(--font-display);
+  font-weight: 500;
+  letter-spacing: -0.015em;
+  line-height: 1.1;
+  text-wrap: balance;
+}
+
+p {
+  text-wrap: pretty;
+}
+
+/* Keep a focused field clear of the sticky header and the sticky booking bar. */
+input,
+select,
+textarea {
+  scroll-margin-block: 6rem;
 }
 
 :focus-visible {
-  outline: 2px solid var(--color-clay);
+  outline: 3px solid var(--color-cherry);
   outline-offset: 2px;
 }
 
+::selection {
+  background: var(--color-leaf);
+}
+
+@utility wrap {
+  @apply mx-auto w-full max-w-[1200px] px-5 sm:px-8;
+}
+
 @utility btn {
-  @apply inline-flex items-center justify-center gap-2 rounded-full px-5 py-2.5 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50;
+  @apply inline-flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-[var(--radius-ui)] px-5 text-[0.95rem] font-semibold transition-[background-color,transform,box-shadow] duration-150 select-none active:translate-y-px disabled:cursor-not-allowed disabled:opacity-55;
 }
+
 @utility btn-primary {
-  @apply btn bg-estate text-white hover:bg-estate-dark;
+  @apply btn bg-canopy text-white hover:bg-canopy-deep;
 }
+
 @utility btn-ghost {
-  @apply btn border border-line bg-white text-ink hover:bg-sand;
+  @apply btn border border-field bg-surface text-ink hover:bg-leaf;
 }
+
 @utility btn-sm {
-  @apply px-3.5 py-1.5 text-xs;
+  @apply min-h-10 px-3.5 text-sm;
 }
+
 @utility field {
-  @apply block w-full rounded-lg border border-line bg-white px-3 py-2.5 text-sm text-ink placeholder:text-muted/70 focus:border-moss focus:outline-none;
+  @apply block min-h-11 w-full rounded-[var(--radius-ui)] border border-field bg-white px-3 py-2.5 text-base text-ink placeholder:text-muted focus:border-canopy focus:outline-2 focus:outline-offset-0 focus:outline-canopy aria-[invalid=true]:border-alert;
 }
+
 @utility label {
-  @apply mb-1.5 block text-xs font-medium tracking-wide text-muted uppercase;
+  @apply mb-1.5 block text-sm font-semibold text-ink;
 }
-@utility card {
-  @apply rounded-2xl border border-line bg-white;
+
+@utility panel {
+  @apply rounded-[var(--radius-ui)] border border-line bg-surface;
 }
-@utility eyebrow {
-  @apply text-xs font-medium tracking-[0.14em] text-moss uppercase;
+
+@utility link {
+  @apply font-semibold text-canopy underline decoration-1 underline-offset-4 hover:decoration-2;
+}
+
+@utility sr-only-focusable {
+  @apply sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50 focus:rounded-[var(--radius-ui)] focus:bg-white focus:px-4 focus:py-2;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  * {
-    animation: none !important;
-    transition: none !important;
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .motion-hide {
+    display: none !important;
   }
 }
