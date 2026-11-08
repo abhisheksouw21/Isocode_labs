@@ -1,36 +1,21 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Kaapi Hills Estate: direct booking and enquiry routing
 
-## Getting Started
+A booking website and staff workspace for a 76-key coffee-estate resort in Chikkamagaluru. Guests pick dates, see real prices with GST, and pay. Every enquiry, from the web form, email or WhatsApp, lands in one inbox, routed to the right person with a draft reply ready.
 
-First, run the development server:
+- **Setup, demo logins and deployment:** [`deployment.md`](./deployment.md)
+- **Design decisions, data model and limits:** the Technical Design Document submitted with this repo (source in [`docs/TDD.md`](./docs/TDD.md))
+
+## What to look at
+
+- **No overbooking.** The website sells only an admin-set allotment. A Postgres `CHECK (sold + held <= allotment)` backs it up. A stay takes a 10-minute hold on every night at once, or on none. In a test, 20 simultaneous bookings for the last villa produce exactly 1 success ([`tests/booking.test.ts`](./tests/booking.test.ts)).
+- **The AI is kept away from facts.** A local Naive Bayes model classifies and a rule-based extractor pulls out dates, guests and budget. Prices and availability in drafts come from the database, never from the model. Low confidence goes to an Unsorted lane, complaints alert the GM by rule, and nothing is sent automatically ([`src/lib/ai`](./src/lib/ai)).
+- **GST comes from a table.** The slab is chosen per night by tariff, after discounts.
+
+## Stack
+
+Next.js 15 (App Router, TypeScript), PostgreSQL with Drizzle ORM, Tailwind CSS 4, Zod, jose (JWT session cookies), Vitest.
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install && cp .env.example .env   # set DATABASE_URL and SESSION_SECRET
+npm run db:migrate && npm run db:seed && npm run dev
 ```
-
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
