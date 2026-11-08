@@ -7,7 +7,7 @@ export function isIsoDate(value: string): boolean {
   return !Number.isNaN(d.getTime()) && d.toISOString().slice(0, 10) === value;
 }
 
-export function toDate(iso: string): Date {
+function toDate(iso: string): Date {
   return new Date(`${iso}T00:00:00Z`);
 }
 

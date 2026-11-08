@@ -16,7 +16,7 @@ function stem(word: string): string {
   return word;
 }
 
-export function tokenize(text: string): string[] {
+function tokenize(text: string): string[] {
   const words = text
     .toLowerCase()
     .replace(/[’']/g, "")
@@ -35,7 +35,7 @@ export type NbModel = {
   logUnseen: Record<CategoryLabel, number>;
 };
 
-export function trainModel(examples: { text: string; label: string }[], alpha = 1): NbModel {
+function trainModel(examples: { text: string; label: string }[], alpha = 1): NbModel {
   const vocab = new Set<string>();
   const counts = Object.fromEntries(CATEGORIES.map((c) => [c, new Map<string, number>()])) as Record<CategoryLabel, Map<string, number>>;
   const docs = Object.fromEntries(CATEGORIES.map((c) => [c, 0])) as Record<CategoryLabel, number>;

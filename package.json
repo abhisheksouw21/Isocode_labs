@@ -14,7 +14,6 @@
     "db:seed": "tsx scripts/seed.ts",
     "db:reset": "npm run db:migrate && npm run db:seed",
     "ai:eval": "tsx scripts/eval-classifier.ts",
-    "images": "tsx scripts/make-images.ts",
     "vercel-build": "npm run db:migrate && next build"
   },
   "dependencies": {

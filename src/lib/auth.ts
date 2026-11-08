@@ -6,7 +6,7 @@ import { redirect } from "next/navigation";
 import { db, schema } from "@/db";
 import { AppError } from "./errors";
 
-export const SESSION_COOKIE = "kh_session";
+const SESSION_COOKIE = "kh_session";
 const SESSION_HOURS = 12;
 let dummyHash: string | undefined;
 
@@ -18,7 +18,7 @@ function secret() {
   return new TextEncoder().encode(value);
 }
 
-export async function signSession(s: Session) {
+async function signSession(s: Session) {
   return new SignJWT({ ...s })
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
@@ -26,7 +26,7 @@ export async function signSession(s: Session) {
     .sign(secret());
 }
 
-export async function verifySession(token: string | undefined): Promise<Session | null> {
+async function verifySession(token: string | undefined): Promise<Session | null> {
   if (!token) return null;
   try {
     const { payload } = await jwtVerify(token, secret());

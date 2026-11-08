@@ -28,7 +28,7 @@ export function findSlab(tariff: number, slabs: Slab[]): Slab {
   return slab;
 }
 
-export function applyPlan(rate: number, adjustmentPct: number): number {
+function applyPlan(rate: number, adjustmentPct: number): number {
   return Math.round((rate * (100 + adjustmentPct)) / 100);
 }
 

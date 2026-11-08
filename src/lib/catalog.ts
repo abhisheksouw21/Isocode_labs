@@ -1,4 +1,4 @@
-import { and, asc, eq, gte, lt } from "drizzle-orm";
+import { and, asc, eq } from "drizzle-orm";
 import { db, schema } from "@/db";
 import type { Slab } from "./pricing";
 
@@ -25,12 +25,4 @@ export async function getSlabs(onDate: string): Promise<Slab[]> {
   return applicable
     .filter((r) => r.effectiveFrom === latest)
     .map((r) => ({ label: r.label, minTariff: r.minTariff, maxTariff: r.maxTariff, ratePct: Number(r.ratePct) }));
-}
-
-export async function getInventoryRange(roomTypeId: number, from: string, to: string) {
-  return db
-    .select()
-    .from(schema.inventory)
-    .where(and(eq(schema.inventory.roomTypeId, roomTypeId), gte(schema.inventory.date, from), lt(schema.inventory.date, to)))
-    .orderBy(asc(schema.inventory.date));
 }

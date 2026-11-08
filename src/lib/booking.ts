@@ -2,17 +2,17 @@ import { randomBytes } from "node:crypto";
 import { and, eq, sql } from "drizzle-orm";
 import { db, schema, type Tx } from "@/db";
 import { getRatePlans, getRoomTypes, getSlabs } from "./catalog";
-import { addDays, eachNight, isIsoDate, nightsBetween, todayAtResort } from "./dates";
+import { addDays, isIsoDate, nightsBetween, todayAtResort } from "./dates";
 import { AppError, notFound } from "./errors";
 import { quoteStay, type Quote } from "./pricing";
 
-export const HOLD_MINUTES = 10;
-export const MAX_NIGHTS = 14;
-export const BOOKING_WINDOW_DAYS = 365;
+const HOLD_MINUTES = 10;
+const MAX_NIGHTS = 14;
+const BOOKING_WINDOW_DAYS = 365;
 
 export type StaySearch = { checkIn: string; checkOut: string; adults: number; children: number };
 
-export function validateStay(s: StaySearch, today = todayAtResort()) {
+function validateStay(s: StaySearch, today = todayAtResort()) {
   if (!isIsoDate(s.checkIn) || !isIsoDate(s.checkOut)) throw new AppError("BAD_DATES", "Choose valid dates");
   if (s.checkIn < today) throw new AppError("PAST_DATE", "Check-in can't be in the past");
   const nights = nightsBetween(s.checkIn, s.checkOut);
@@ -26,7 +26,7 @@ export function validateStay(s: StaySearch, today = todayAtResort()) {
 type InvRow = { date: string; rate: number; allotment: number; sold: number; held: number; closed: boolean };
 
 /** Rooms the website can still sell for every night of the stay. */
-export function sellableUnits(rows: InvRow[], nights: number): number {
+function sellableUnits(rows: InvRow[], nights: number): number {
   if (rows.length !== nights) return 0;
   return Math.max(0, Math.min(...rows.map((r) => (r.closed ? 0 : r.allotment - r.sold - r.held))));
 }
@@ -80,7 +80,7 @@ export async function searchAvailability(s: StaySearch): Promise<RoomAvailabilit
   });
 }
 
-export async function resolvePromo(code: string | undefined, checkIn: string, nights: number, tx: Tx | typeof db = db) {
+async function resolvePromo(code: string | undefined, checkIn: string, nights: number, tx: Tx | typeof db = db) {
   if (!code) return null;
   const normalised = code.trim().toUpperCase();
   const [promo] = await tx.select().from(schema.promoCodes).where(eq(schema.promoCodes.code, normalised));
@@ -283,7 +283,6 @@ export async function getBookingByRef(ref: string) {
   return row ?? null;
 }
 
-export { eachNight };
 
 /** Resolves slug + plan code and prices the stay, with an optional promo code. */
 export async function quoteRoom(input: StaySearch & { roomSlug: string; planCode: string; promoCode?: string }) {
