@@ -66,6 +66,7 @@ export async function searchAvailability(s: StaySearch): Promise<RoomAvailabilit
         roomRows.length === nights
           ? plans
               .filter((p) => p.roomTypeId === room.id)
+              .sort((a, b) => Number(b.code === "BB") - Number(a.code === "BB") || a.adjustmentPct - b.adjustmentPct)
               .map((p) => ({
                 id: p.id,
                 code: p.code,
@@ -283,3 +284,24 @@ export async function getBookingByRef(ref: string) {
 }
 
 export { eachNight };
+
+/** Resolves slug + plan code and prices the stay, with an optional promo code. */
+export async function quoteRoom(input: StaySearch & { roomSlug: string; planCode: string; promoCode?: string }) {
+  const nights = validateStay(input);
+  const [room] = await db.select().from(schema.roomTypes).where(eq(schema.roomTypes.slug, input.roomSlug));
+  if (!room) throw notFound("Room");
+  const [plan] = await db
+    .select()
+    .from(schema.ratePlans)
+    .where(and(eq(schema.ratePlans.roomTypeId, room.id), eq(schema.ratePlans.code, input.planCode), eq(schema.ratePlans.active, true)));
+  if (!plan) throw notFound("Rate plan");
+  const avail = (await searchAvailability(input)).find((r) => r.roomTypeId === room.id)!;
+  const promo = await resolvePromo(input.promoCode || undefined, input.checkIn, nights);
+  const rows = await db
+    .select()
+    .from(schema.inventory)
+    .where(and(eq(schema.inventory.roomTypeId, room.id), sql`${schema.inventory.date} >= ${input.checkIn}`, sql`${schema.inventory.date} < ${input.checkOut}`))
+    .orderBy(schema.inventory.date);
+  const quote = rows.length === nights ? quoteStay(rows, { adjustmentPct: plan.adjustmentPct, percentOff: promo?.percentOff ?? 0, slabs: await getSlabs(input.checkIn) }) : null;
+  return { room, plan, avail, quote, promo: promo ? { code: promo.code, percentOff: promo.percentOff } : null };
+}
