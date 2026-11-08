@@ -2,12 +2,13 @@ import Link from "next/link";
 
 export default function NotFound() {
   return (
-    <div className="flex min-h-dvh flex-col items-center justify-center gap-4 px-4 text-center">
-      <p className="eyebrow">404</p>
-      <h1 className="text-3xl">We couldn&apos;t find that page</h1>
-      <Link href="/" className="btn-primary">
-        Back to the estate
+    <main className="wrap flex min-h-dvh flex-col justify-center py-16">
+      <p className="text-muted">Error 404</p>
+      <h1 className="mt-2 text-5xl">This page isn&apos;t on the estate map</h1>
+      <p className="mt-4 max-w-md text-lg">The link may be old, or the booking reference may have a typo.</p>
+      <Link href="/" className="btn-primary mt-8 w-fit">
+        Go to the home page
       </Link>
-    </div>
+    </main>
   );
 }

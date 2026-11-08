@@ -1,49 +1,78 @@
 import Image from "next/image";
 import Link from "next/link";
-import type { RoomAvailability } from "@/lib/booking";
 import type { RoomType } from "@/db/schema";
+import type { RoomAvailability } from "@/lib/booking";
 import { formatINR } from "@/lib/money";
+import { StatusNote } from "./StatusNote";
 
-export function RoomCard({ room, avail, query, nights, priority }: { room: RoomType; avail?: RoomAvailability; query: string; nights: number; priority?: boolean }) {
-  const bb = avail?.plans.find((p) => p.code === "BB") ?? avail?.plans[0];
-  const bookable = avail && avail.fits && avail.available > 0 && bb;
-  let status: string;
-  if (!avail) status = "Check dates to see prices";
-  else if (!avail.fits) status = `Sleeps up to ${room.maxGuests} (${room.maxAdults} adults)`;
-  else if (avail.available === 0) status = avail.closedNights.length ? "Closed on some of these nights" : "Sold out for these dates";
-  else status = avail.available <= 2 ? `Only ${avail.available} left on our site` : "Available";
+export function roomStatus(room: RoomType, avail?: RoomAvailability) {
+  if (!avail) return { tone: "info" as const, text: "Pick dates to see prices" };
+  if (!avail.fits) return { tone: "none" as const, text: `Sleeps up to ${room.maxGuests}, so it doesn't fit this group` };
+  if (avail.available === 0) return { tone: "none" as const, text: avail.closedNights.length ? "Closed on some of these nights" : "Sold out for these dates" };
+  if (avail.available <= 2) return { tone: "low" as const, text: `Only ${avail.available} left on our website` };
+  return { tone: "ok" as const, text: "Available for your dates" };
+}
+
+function nightly(avail: RoomAvailability | undefined, nights: number) {
+  const plan = avail?.plans.find((p) => p.code === "BB") ?? avail?.plans[0];
+  if (!avail || !plan || !avail.fits || avail.available === 0) return null;
+  return Math.round(plan.quote.total / nights);
+}
+
+export function RoomCard({
+  room,
+  avail,
+  query,
+  nights,
+  feature = false,
+  priority = false,
+}: {
+  room: RoomType;
+  avail?: RoomAvailability;
+  query: string;
+  nights: number;
+  feature?: boolean;
+  priority?: boolean;
+}) {
+  const status = roomStatus(room, avail);
+  const price = nightly(avail, nights);
+  const href = `/rooms/${room.slug}?${query}`;
 
   return (
-    <Link href={`/rooms/${room.slug}?${query}`} className="group card overflow-hidden transition-shadow hover:shadow-md">
-      <div className="relative aspect-[3/2] overflow-hidden bg-sand">
+    <article className={`group grid gap-5 ${feature ? "lg:grid-cols-12 lg:items-end lg:gap-10" : ""}`}>
+      <Link href={href} className={`relative block overflow-hidden bg-leaf ${feature ? "aspect-[4/3] lg:col-span-7 lg:aspect-[3/2]" : "aspect-[4/3]"}`} tabIndex={-1} aria-hidden>
         <Image
           src={room.images[0]}
-          alt={`${room.name}: ${room.view.toLowerCase()} view`}
+          alt=""
           fill
-          sizes="(min-width: 1024px) 380px, (min-width: 640px) 50vw, 100vw"
-          className="object-cover transition-transform duration-500 group-hover:scale-[1.02]"
+          sizes={feature ? "(min-width: 1024px) 700px, 100vw" : "(min-width: 1024px) 560px, (min-width: 640px) 50vw, 100vw"}
+          className="object-cover transition-transform duration-500 group-hover:scale-[1.025]"
           priority={priority}
         />
-        {room.kind === "VILLA" && <span className="absolute top-3 left-3 rounded-full bg-white/90 px-2.5 py-1 text-xs font-medium text-estate">Villa</span>}
-      </div>
-      <div className="space-y-3 p-5">
-        <div>
-          <h3 className="text-xl text-ink">{room.name}</h3>
-          <p className="mt-1 text-sm text-muted">{room.tagline}</p>
-        </div>
-        <p className="text-xs text-muted">
-          {room.sizeSqm} m² · {room.bed} · sleeps {room.maxGuests}
-        </p>
-        <div className="flex items-end justify-between border-t border-line pt-3">
-          <p className={`text-xs ${bookable ? (avail!.available <= 2 ? "text-clay" : "text-ok") : "text-muted"}`}>{status}</p>
-          {bookable && (
+      </Link>
+      <div className={feature ? "lg:col-span-5 lg:pb-2" : ""}>
+        <p className="text-sm text-muted">{room.kind === "VILLA" ? "Villa" : "Room"}, {room.sizeSqm} m², sleeps {room.maxGuests}</p>
+        <h3 className={`mt-1 ${feature ? "text-4xl" : "text-[1.75rem]"}`}>
+          <Link href={href} className="hover:underline hover:decoration-2 hover:underline-offset-4">
+            {room.name}
+          </Link>
+        </h3>
+        <p className="mt-2 max-w-prose text-muted">{room.tagline}</p>
+        <div className="mt-4 flex flex-wrap items-end justify-between gap-x-6 gap-y-3">
+          <StatusNote tone={status.tone}>{status.text}</StatusNote>
+          {price !== null && (
             <p className="text-right">
-              <span className="block text-lg font-medium text-ink">{formatINR(Math.round(bb.quote.total / nights))}</span>
-              <span className="text-xs text-muted">avg / night incl. GST</span>
+              <span className="font-display text-2xl">{formatINR(price)}</span>
+              <span className="block text-sm text-muted">a night on average, with breakfast and GST</span>
             </p>
           )}
         </div>
+        {feature && (
+          <Link href={href} className="btn-primary mt-6">
+            See the {room.kind === "VILLA" ? "villa" : "room"} and rates
+          </Link>
+        )}
       </div>
-    </Link>
+    </article>
   );
 }
