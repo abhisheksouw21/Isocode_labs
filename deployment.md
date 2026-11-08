@@ -2,7 +2,7 @@
 
 Kaapi Hills Estate: a direct-booking site and enquiry inbox for Company A, built as one Next.js app with Postgres.
 
-- **Repository:** `<add your GitHub URL>`
+- **Repository:** https://github.com/abhisheksouw21/Isocode_labs
 - **Live app:** `<add your Vercel URL>`
 
 ## Demo logins
