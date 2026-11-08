@@ -10,15 +10,15 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
   const { next } = await searchParams;
   const safeNext = next && next.startsWith("/staff") ? next : "/staff/inbox";
   return (
-    <div className="flex min-h-dvh items-center justify-center px-4">
+    <main className="flex min-h-dvh items-center justify-center px-4">
       <div className="w-full max-w-sm">
-        <p className="eyebrow text-center">{RESORT.name}</p>
+        <p className="text-center text-muted">{RESORT.name}</p>
         <h1 className="mt-1 text-center text-3xl">Staff sign in</h1>
-        <div className="card mt-6 p-6">
+        <div className="panel mt-6 p-6">
           <LoginForm next={safeNext} />
         </div>
         <p className="mt-4 text-center text-xs text-muted">Demo accounts are listed in deployment.md.</p>
       </div>
-    </div>
+    </main>
   );
 }

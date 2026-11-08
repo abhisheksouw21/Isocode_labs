@@ -6,11 +6,11 @@ import { formatINR } from "@/lib/money";
 export const metadata = { title: "Bookings" };
 
 const TONE: Record<string, string> = {
-  CONFIRMED: "bg-ok/10 text-ok",
-  HOLD: "bg-warn/10 text-warn",
-  EXPIRED: "bg-sand text-muted",
-  PAYMENT_FAILED: "bg-alert/10 text-alert",
-  CANCELLED: "bg-sand text-muted",
+  CONFIRMED: "bg-ok-tint text-ok",
+  HOLD: "bg-warn-tint text-warn",
+  EXPIRED: "bg-leaf text-muted",
+  PAYMENT_FAILED: "bg-alert-tint text-alert",
+  CANCELLED: "bg-leaf text-muted",
 };
 
 export default async function BookingsPage() {
@@ -22,7 +22,7 @@ export default async function BookingsPage() {
         <h1 className="text-2xl">Website bookings</h1>
         <p className="text-sm text-muted">Latest 40, including live holds and failed payments.</p>
       </div>
-      <div className="card overflow-x-auto">
+      <div className="panel overflow-x-auto" tabIndex={0} role="region" aria-label="Website bookings table">
         <table className="w-full min-w-[760px] text-sm">
           <thead>
             <tr className="text-left text-xs text-muted">

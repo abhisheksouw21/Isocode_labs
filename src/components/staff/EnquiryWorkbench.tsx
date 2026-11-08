@@ -69,15 +69,15 @@ export function EnquiryWorkbench(p: Props) {
   }
 
   return (
-    <div className="card space-y-4 p-5">
+    <div className="panel space-y-4 p-5">
       <div className="flex flex-wrap items-center gap-2">
-        <p className="eyebrow mr-2">Re-route</p>
+        <p className="text-sm font-semibold text-muted mr-2">Re-route</p>
         {ROUTES.map((r) => (
           <button
             key={r}
             onClick={() => act("reroute", { lane: r }, `Moved to ${LANE_LABEL[r]}. Draft rebuilt.`)}
             disabled={!!busy || p.lane === r}
-            className={`rounded-full border px-3 py-1 text-xs ${p.lane === r ? "border-estate bg-estate text-white" : "border-line bg-white hover:bg-sand"} disabled:cursor-default`}
+            className={`rounded-full border px-3 py-1 text-xs ${p.lane === r ? "border-canopy bg-canopy text-white" : "border-line bg-white hover:bg-leaf"} disabled:cursor-default`}
             aria-pressed={p.lane === r}
           >
             {busy === "reroute" ? "…" : LANE_LABEL[r]}
@@ -92,7 +92,7 @@ export function EnquiryWorkbench(p: Props) {
 
       <div>
         <div className="mb-1.5 flex items-center justify-between">
-          <label htmlFor="draft" className="eyebrow">
+          <label htmlFor="draft" className="text-sm font-semibold text-muted">
             Draft reply
           </label>
           <span className="text-xs text-muted">Not sent until you send it on {CHANNEL_LABEL[p.channel]}</span>
@@ -102,12 +102,12 @@ export function EnquiryWorkbench(p: Props) {
       </div>
 
       {p.facts.length > 0 && (
-        <div className="rounded-xl bg-paper p-3 text-xs">
+        <div className="rounded-xl bg-mist p-3 text-xs">
           <p className="font-medium text-ink">Facts in this draft come from the system, not the model</p>
           <ul className="mt-1.5 space-y-1 text-muted">
             {p.facts.map((f, i) => (
               <li key={i} className="flex gap-2">
-                <span className="shrink-0 rounded bg-white px-1.5 text-[10px] uppercase">{f.source}</span>
+                <span className="shrink-0 rounded bg-white px-1.5 text-xs uppercase">{f.source}</span>
                 <span>{f.text}</span>
               </li>
             ))}
@@ -119,7 +119,7 @@ export function EnquiryWorkbench(p: Props) {
       {message && (
         <p
           role="status"
-          className={`rounded-lg px-3 py-2 text-sm ${message.tone === "ok" ? "bg-ok/10 text-ok" : message.tone === "warn" ? "bg-warn/10 text-warn" : "bg-alert/10 text-alert"}`}
+          className={`rounded-lg px-3 py-2 text-sm ${message.tone === "ok" ? "bg-ok-tint text-ok" : message.tone === "warn" ? "bg-warn-tint text-warn" : "bg-alert-tint text-alert"}`}
         >
           {message.text}
         </p>

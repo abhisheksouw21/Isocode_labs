@@ -1,5 +1,6 @@
 "use client";
 
+import { CircleCheck, CirclePause } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import type { PromoCode } from "@/db/schema";
@@ -42,11 +43,11 @@ export function PromoManager({ promos, today }: { promos: PromoCode[]; today: st
 
   return (
     <div className="space-y-4">
-      <div className="card overflow-x-auto">
+      <div className="panel overflow-x-auto">
         <table className="w-full min-w-[640px] text-sm">
           <thead>
             <tr className="text-left text-xs text-muted">
-              {["Code", "Off", "Min nights", "Valid for check-ins", "Used", ""].map((h) => (
+              {["Code", "Off", "Min nights", "Valid for check-ins", "Used", "Status"].map((h) => (
                 <th key={h} className="px-4 py-3 font-normal">
                   {h}
                 </th>
@@ -73,10 +74,17 @@ export function PromoManager({ promos, today }: { promos: PromoCode[]; today: st
                   {p.uses}
                   {p.maxUses ? ` / ${p.maxUses}` : ""}
                 </td>
-                <td className="px-4 py-3 text-right">
-                  <button onClick={() => toggle(p)} className="btn-ghost btn-sm">
-                    {p.active ? "Pause" : "Resume"}
-                  </button>
+                <td className="px-4 py-3">
+                  <span className="flex items-center justify-between gap-3">
+                    <span className={`inline-flex items-center gap-1 text-xs font-semibold ${p.active ? "text-ok" : "text-muted"}`}>
+                      {p.active ? <CircleCheck className="size-3.5" aria-hidden /> : <CirclePause className="size-3.5" aria-hidden />}
+                      {p.active ? "Active" : "Paused"}
+                    </span>
+                    <button onClick={() => toggle(p)} className="btn-ghost btn-sm relative">
+                      {p.active ? "Pause" : "Resume"}
+                      <span className="sr-only"> {p.code}</span>
+                    </button>
+                  </span>
                 </td>
               </tr>
             ))}
@@ -84,7 +92,7 @@ export function PromoManager({ promos, today }: { promos: PromoCode[]; today: st
         </table>
       </div>
 
-      <form onSubmit={create} className="card grid gap-3 p-5 sm:grid-cols-6">
+      <form onSubmit={create} className="panel grid gap-3 p-5 sm:grid-cols-6">
         <h2 className="text-lg sm:col-span-6">New promo code</h2>
         <div className="sm:col-span-2">
           <label className="label" htmlFor="code">

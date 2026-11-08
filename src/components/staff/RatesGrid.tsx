@@ -20,7 +20,7 @@ export function RatesGrid({ data, today }: { data: Grid; today: string }) {
 
   return (
     <div className="grid gap-4 xl:grid-cols-[1fr_320px]">
-      <div className="card overflow-hidden">
+      <div className="panel min-w-0 overflow-hidden">
         <div className="flex items-center justify-between border-b border-line px-4 py-3 text-sm">
           <Link href={`/staff/rates?from=${addDays(data.from, -14)}`} className="btn-ghost btn-sm" aria-label="Previous two weeks">
             ←
@@ -45,7 +45,7 @@ export function RatesGrid({ data, today }: { data: Grid; today: string }) {
               <tr>
                 <th className="sticky left-0 z-10 w-44 bg-white px-3 py-2 text-left font-medium text-muted">Room type</th>
                 {dates.map((d) => (
-                  <th key={d} className={`px-1 py-2 text-center font-normal ${weekday(d) === 5 || weekday(d) === 6 ? "bg-sand/50" : ""}`}>
+                  <th key={d} className={`px-1 py-2 text-center font-normal ${weekday(d) === 5 || weekday(d) === 6 ? "bg-leaf" : ""}`}>
                     <span className="block text-muted">{WEEKDAYS[weekday(d)]}</span>
                     <span className="text-ink">{Number(d.slice(8))}</span>
                   </th>
@@ -69,16 +69,18 @@ export function RatesGrid({ data, today }: { data: Grid; today: string }) {
                       <td key={d} className="p-0.5">
                         <button
                           onClick={() => setSel({ roomTypeId: room.id, from: d, to: d })}
-                          className={`w-full rounded-md px-1 py-1.5 text-center transition-colors ${
-                            selected ? "ring-2 ring-estate" : ""
-                          } ${c.closed ? "bg-ink/80 text-white" : full ? "bg-clay/15" : "bg-paper hover:bg-sand"}`}
-                          title={`${room.name}, ${d}: ${c.sold} sold, ${c.held} on hold, allotment ${c.allotment}${c.closed ? " (closed)" : ""}`}
+                          className={`min-h-11 w-full rounded-md px-1 py-1.5 text-center text-xs transition-colors ${
+                            selected ? "ring-2 ring-canopy" : ""
+                          } ${c.closed ? "bg-ink text-white" : full ? "bg-alert-tint" : "bg-mist hover:bg-leaf"}`}
+                          aria-label={`${room.name}, ${d}: rate ${formatINR(c.rate)}, ${c.sold} sold, ${c.held} on hold, allotment ${c.allotment}${c.closed ? ", closed" : full ? ", full" : ""}`}
+                          aria-pressed={!!selected}
                         >
                           <span className="block tabular-nums">{c.closed ? "Closed" : `₹${(c.rate / 1000).toFixed(1)}k`}</span>
-                          <span className={`block tabular-nums ${full && !c.closed ? "text-clay" : "opacity-70"}`}>
+                          <span className={`block tabular-nums ${full && !c.closed ? "font-semibold text-alert" : ""}`}>
                             {taken}/{c.allotment}
-                            {c.held > 0 ? "•" : ""}
+                            {full && !c.closed ? " full" : ""}
                           </span>
+                          {c.held > 0 && <span className="block text-xs font-semibold text-warn">{c.held} paying</span>}
                         </button>
                       </td>
                     );
@@ -89,7 +91,7 @@ export function RatesGrid({ data, today }: { data: Grid; today: string }) {
           </table>
         </div>
         <p className="border-t border-line px-4 py-2 text-xs text-muted">
-          sold + held / allotment · • = a guest is paying right now · shaded = full on the website · dark = closed (blackout)
+          Each cell shows the rate, then rooms sold or on hold out of the website allotment. &ldquo;Full&rdquo; means the website has none left, &ldquo;paying&rdquo; means a guest is paying now, and dark cells are closed (blackout).
         </p>
       </div>
 
@@ -156,14 +158,14 @@ function EditPanel({
   }
 
   return (
-    <form onSubmit={save} className="card h-fit space-y-4 p-5">
+    <form onSubmit={save} className="panel h-fit space-y-4 p-5">
       <div>
         <h2 className="text-lg">{sel ? "Edit nights" : "Bulk edit"}</h2>
         <p className="text-xs text-muted">Pick a cell, or set a range. Leave a field empty to keep it as it is.</p>
       </div>
       {current && (
-        <p className="rounded-lg bg-paper px-3 py-2 text-xs text-muted">
-          {current.sold} sold · {current.held} on hold · {formatINR(current.rate)} now
+        <p className="rounded-lg bg-mist px-3 py-2 text-xs text-muted">
+          {current.sold} sold, {current.held} on hold, {formatINR(current.rate)} a night now
         </p>
       )}
       <div>
@@ -200,7 +202,7 @@ function EditPanel({
               key={w}
               type="button"
               onClick={() => setDays(days.includes(i) ? days.filter((d) => d !== i) : [...days, i])}
-              className={`rounded-full border px-2 py-0.5 text-xs ${days.includes(i) ? "border-estate bg-estate text-white" : "border-line"}`}
+              className={`rounded-full border px-2 py-0.5 text-xs ${days.includes(i) ? "border-canopy bg-canopy text-white" : "border-line"}`}
             >
               {w}
             </button>

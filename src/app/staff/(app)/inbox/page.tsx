@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { CATEGORY_LABEL, ChannelBadge, ConfidenceMeter, LANE_LABEL, SourceBadge, timeAgo } from "@/components/staff/badges";
+import { BellRing } from "lucide-react";
+import { AlertBadge, CATEGORY_LABEL, ChannelBadge, ConfidenceMeter, LANE_LABEL, NeedsHumanBadge, SourceBadge, timeAgo } from "@/components/staff/badges";
 import { EnquiryWorkbench } from "@/components/staff/EnquiryWorkbench";
 import { SimulateEnquiry } from "@/components/staff/SimulateEnquiry";
 import { confidenceThreshold } from "@/lib/ai/classify";
@@ -56,10 +57,10 @@ export default async function InboxPage({ searchParams }: { searchParams: Promis
       </div>
 
       {isGm && alerts.length > 0 && view !== "COMPLAINT" && (
-        <Link href={href({ view: "COMPLAINT", id: String(alerts[0].enquiry.id) })} className="flex items-center gap-3 rounded-xl border border-alert/30 bg-alert/5 px-4 py-3 text-sm text-alert">
-          <span className="size-2 shrink-0 rounded-full bg-alert" />
+        <Link href={href({ view: "COMPLAINT", id: String(alerts[0].enquiry.id) })} className="flex items-center gap-3 rounded-xl border border-alert bg-alert-tint px-4 py-3 text-sm text-alert">
+          <BellRing className="size-5 shrink-0" aria-hidden />
           <span>
-            {alerts.length} complaint{alerts.length > 1 ? "s" : ""} need{alerts.length === 1 ? "s" : ""} your attention · latest from {alerts[0].enquiry.fromName}
+            {alerts.length} complaint{alerts.length > 1 ? "s" : ""} need{alerts.length === 1 ? "s" : ""} your attention. Latest from {alerts[0].enquiry.fromName}.
           </span>
         </Link>
       )}
@@ -69,22 +70,27 @@ export default async function InboxPage({ searchParams }: { searchParams: Promis
           <Link
             key={t.key}
             href={href({ view: t.key, id: undefined })}
-            className={`flex shrink-0 items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm ${view === t.key ? "border-estate bg-estate text-white" : "border-line bg-white text-muted hover:text-ink"}`}
+            className={`relative flex min-h-11 shrink-0 items-center gap-1.5 rounded-full border px-3 text-sm ${view === t.key ? "border-canopy bg-canopy text-white" : "border-line bg-white text-muted hover:text-ink"}`}
           >
             {t.label}
-            {"n" in t && t.n! > 0 && <span className={`text-xs ${view === t.key ? "text-white/80" : t.alert ? "text-alert" : ""}`}>{t.n}</span>}
+            {"n" in t && t.n! > 0 && (
+              <span className={`text-xs font-semibold ${view === t.key ? "text-white" : t.alert ? "text-alert" : ""}`}>
+                {t.n}
+                <span className="sr-only"> open</span>
+              </span>
+            )}
           </Link>
         ))}
         <span className="mx-1 w-px shrink-0 bg-line" />
         {(["NEW", "REPLIED", "CLOSED"] as const).map((s) => (
-          <Link key={s} href={href({ status: s, id: undefined })} className={`shrink-0 rounded-full px-3 py-1.5 text-sm ${status === s ? "bg-sand text-ink" : "text-muted hover:text-ink"}`}>
+          <Link key={s} href={href({ status: s, id: undefined })} className={`relative flex min-h-11 shrink-0 items-center rounded-full px-3 text-sm ${status === s ? "bg-leaf text-ink" : "text-muted hover:text-ink"}`}>
             {s === "NEW" ? "Open" : s === "REPLIED" ? "Replied" : "Closed"}
           </Link>
         ))}
       </div>
 
       <div className="grid gap-4 lg:grid-cols-[380px_1fr]">
-        <ul className={`card divide-y divide-line overflow-hidden ${selected ? "hidden lg:block" : ""}`}>
+        <ul className={`panel min-w-0 divide-y divide-line overflow-hidden ${selected ? "hidden lg:block" : ""}`}>
           {rows.length === 0 && (
             <li className="p-8 text-center text-sm text-muted">
               {view === "UNSORTED" ? "Nothing unsorted. The model is confident about everything open." : view === "mine" ? "You're all caught up." : "No enquiries here."}
@@ -92,18 +98,18 @@ export default async function InboxPage({ searchParams }: { searchParams: Promis
           )}
           {rows.map(({ enquiry: e, assignee }) => (
             <li key={e.id}>
-              <Link href={href({ id: String(e.id) })} className={`block space-y-1.5 px-4 py-3 hover:bg-paper ${selectedId === e.id ? "bg-paper" : ""}`}>
+              <Link href={href({ id: String(e.id) })} className={`block space-y-1.5 px-4 py-3 hover:bg-mist ${selectedId === e.id ? "bg-mist" : ""}`}>
                 <div className="flex items-center gap-2">
-                  {e.gmAlert && <span className="size-2 shrink-0 rounded-full bg-alert" aria-label="GM alert" />}
+                  {e.gmAlert && <AlertBadge label="Alert" />}
                   <span className="truncate font-medium">{e.fromName}</span>
                   <ChannelBadge channel={e.channel} />
                   <span className="ml-auto shrink-0 text-xs text-muted">{timeAgo(e.receivedAt)}</span>
                 </div>
                 <p className="line-clamp-2 text-sm text-muted">{e.message}</p>
                 <div className="flex items-center gap-2 text-xs text-muted">
-                  <span className={e.lane === "UNSORTED" ? "text-warn" : e.lane === "COMPLAINT" ? "text-alert" : ""}>{LANE_LABEL[e.lane]}</span>
-                  <span>·</span>
-                  <span className="truncate">{assignee?.name ?? "Unassigned"}</span>
+                  <span className="truncate">
+                    <span className={`font-semibold ${e.lane === "UNSORTED" ? "text-warn" : e.lane === "COMPLAINT" ? "text-alert" : "text-ink"}`}>{LANE_LABEL[e.lane]}</span>, {assignee?.name ?? "Unassigned"}
+                  </span>
                   <span className="ml-auto">
                     <ConfidenceMeter value={e.confidence} threshold={threshold} />
                   </span>
@@ -113,9 +119,9 @@ export default async function InboxPage({ searchParams }: { searchParams: Promis
           ))}
         </ul>
 
-        <section className={selected ? "" : "hidden lg:block"}>
+        <section className={`min-w-0 ${selected ? "" : "hidden lg:block"}`}>
           {!selected ? (
-            <div className="card flex h-full min-h-64 items-center justify-center p-8 text-center text-sm text-muted">Pick an enquiry to see the routing and the draft reply.</div>
+            <div className="panel flex h-full min-h-64 items-center justify-center p-8 text-center text-sm text-muted">Pick an enquiry to see the routing and the draft reply.</div>
           ) : (
             <EnquiryDetail data={selected} threshold={threshold} isGm={isGm} canEdit={isGm || selected.enquiry.assigneeId === session.userId} backHref={href({ id: undefined })} />
           )}
@@ -158,7 +164,7 @@ function EnquiryDetail({
       <Link href={backHref} className="text-sm text-muted lg:hidden">
         ← Back to list
       </Link>
-      <div className="card p-5">
+      <div className="panel p-5">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
             <div className="flex items-center gap-2">
@@ -166,22 +172,22 @@ function EnquiryDetail({
               <ChannelBadge channel={e.channel} />
             </div>
             <p className="mt-0.5 text-sm text-muted">
-              {e.fromContact} · {e.ref} · {e.receivedAt.toLocaleString("en-IN", { timeZone: "Asia/Kolkata", dateStyle: "medium", timeStyle: "short" })}
+              {e.fromContact}, {e.ref}, received {e.receivedAt.toLocaleString("en-IN", { timeZone: "Asia/Kolkata", dateStyle: "medium", timeStyle: "short" })}
             </p>
           </div>
           <p className="text-sm text-muted">
             Owner: <span className="text-ink">{data.assignee?.name ?? "Unassigned"}</span>
           </p>
         </div>
-        <p className="mt-4 rounded-xl bg-paper p-4 text-sm leading-relaxed whitespace-pre-line">{e.message}</p>
+        <p className="mt-4 rounded-xl bg-mist p-4 text-sm leading-relaxed whitespace-pre-line">{e.message}</p>
       </div>
 
-      <div className="card space-y-4 p-5">
+      <div className="panel space-y-4 p-5">
         <div className="flex flex-wrap items-center gap-3">
-          <p className="eyebrow">Routing</p>
+          <p className="text-sm font-semibold text-muted">Routing</p>
           <SourceBadge by={e.classifiedBy} />
-          {e.lane === "UNSORTED" && <span className="rounded bg-warn/10 px-1.5 py-0.5 text-[11px] font-medium text-warn">Below {Math.round(threshold * 100)}% · needs a human</span>}
-          {e.gmAlert && <span className="rounded bg-alert/10 px-1.5 py-0.5 text-[11px] font-medium text-alert">GM alerted</span>}
+          {e.lane === "UNSORTED" && <NeedsHumanBadge threshold={threshold} />}
+          {e.gmAlert && <AlertBadge label="GM alerted" />}
         </div>
         <div className="grid gap-4 sm:grid-cols-2">
           <div>
@@ -223,8 +229,8 @@ function EnquiryDetail({
         canEdit={canEdit}
       />
 
-      <div className="card p-5">
-        <p className="eyebrow">History</p>
+      <div className="panel p-5">
+        <p className="text-sm font-semibold text-muted">History</p>
         <ol className="mt-3 space-y-2 text-sm">
           {data.events.map((ev) => (
             <li key={ev.id} className="flex gap-3">

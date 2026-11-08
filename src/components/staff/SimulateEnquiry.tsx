@@ -45,7 +45,7 @@ export function SimulateEnquiry() {
 
   return (
     <div className="fixed inset-0 z-40 flex items-end justify-center bg-ink/30 p-4 sm:items-center" role="dialog" aria-modal="true" aria-labelledby="sim-title">
-      <form onSubmit={submit} className="card w-full max-w-lg space-y-4 p-5 shadow-lg">
+      <form onSubmit={submit} className="panel w-full max-w-lg space-y-4 p-5 shadow-lg">
         <div className="flex items-start justify-between">
           <div>
             <h2 id="sim-title" className="text-xl">
@@ -59,7 +59,7 @@ export function SimulateEnquiry() {
         </div>
         <div className="flex flex-wrap gap-1.5">
           {PRESETS.map((p, i) => (
-            <button key={i} type="button" onClick={() => setForm({ ...p })} className="rounded-full border border-line px-2.5 py-1 text-xs hover:bg-sand">
+            <button key={i} type="button" onClick={() => setForm({ ...p })} className="rounded-full border border-line px-2.5 py-1 text-xs hover:bg-leaf">
               {p.message.slice(0, 22)}…
             </button>
           ))}

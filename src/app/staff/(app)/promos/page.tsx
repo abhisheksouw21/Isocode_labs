@@ -11,14 +11,14 @@ export default async function PromosPage() {
   const [promos, slabs] = await Promise.all([listPromos(), listTaxSlabs()]);
   return (
     <div className="grid gap-6 xl:grid-cols-[1fr_380px]">
-      <div className="space-y-4">
+      <div className="min-w-0 space-y-4">
         <div>
           <h1 className="text-2xl">Promo codes</h1>
           <p className="text-sm text-muted">Discounts apply before GST, so a promo can move a night into a lower GST slab.</p>
         </div>
         <PromoManager promos={JSON.parse(JSON.stringify(promos))} today={todayAtResort()} />
       </div>
-      <div className="card h-fit p-5">
+      <div className="panel h-fit p-5">
         <h2 className="text-lg">GST slabs</h2>
         <p className="mt-1 text-xs text-muted">
           Read from the <code>tax_slabs</code> table, chosen per night by the room tariff. A rate change is a new row with a new effective date; no code change.
