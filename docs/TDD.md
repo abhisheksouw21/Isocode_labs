@@ -180,7 +180,7 @@ The brief asks for minimal design that sells the experience: large photos, a qui
 - **Rates grid:** room types by 14 nights. Each cell reads "₹19.0k · 2/2", with full nights shaded and blackouts dark. Click a cell to edit it, or bulk-edit a range on chosen weekdays.
 - **States:** every list has an empty state, pages have skeleton loading states, and errors are written for the reader ("This room just sold out for these dates").
 
-**Images:** the brief gives no photos and the build environment couldn't download any, so I generated estate landscapes as compressed WebP (about 15 KB each). They sit in real `next/image` slots with explicit sizes and lazy loading. To use the resort's photography, replace the files in `public/rooms/` under the same names.
+**Images:** the brief gives no photos, so the site uses stand-in photographs of coffee estates, hills and resort interiors, laid out in portrait frames. They are served through `next/image` with explicit sizes, lazy loading and AVIF/WebP, and every photo has written alt text. They were collected from the web without a cleared licence, and a footer line marks them as stand-ins. **Assumption [A12]:** the resort supplies its own photography before launch; each file is replaced under the same name in `public/`.
 
 ## 10. Performance
 
@@ -220,6 +220,7 @@ I also clicked through the whole flow in a headless browser: book the last villa
 | A9 | Venue capacity: lawns 400, conference hall 80, boardroom 16; about 170 guests sleep in-house |
 | A10 | Online bookings up to 14 nights and up to 365 days ahead; max 6 adults and 4 children per search |
 | A11 | Email forwarding and the WhatsApp Business API are simulated by a "Simulate incoming message" tool; booking confirmation emails are not sent in this build |
+| A12 | The resort supplies its own photography before launch; the stand-in photos are replaced file for file |
 
 ## 13. What I cut, and what I'd do next
 
@@ -244,4 +245,4 @@ I also clicked through the whole flow in a headless browser: book the last villa
 - The classifier's evaluation set is small and written by me (see section 6).
 - The in-memory rate limit isn't shared across serverless instances.
 - Booking reference links are unguessable (about 887 million combinations) but not tied to the guest's identity. A production build would add a short email verification step before showing booking details.
-- Seed images are illustrations, not photographs.
+- The photographs are unlicensed stand-ins and must be replaced before launch [A12].

@@ -181,7 +181,7 @@ cd Isocode_labs
 npm install
 
 # 2. Start Postgres (skip if you already have one running)
-docker compose up -d
+docker compose up -d        # port 5432 taken? run: DB_PORT=5433 docker compose up -d, and use :5433 in DATABASE_URL
 
 # 3. Set environment variables
 cp .env.example .env
@@ -251,7 +251,6 @@ The tests use `TEST_DATABASE_URL`, which defaults to `postgresql://resort:resort
 | `npm run db:seed` | Reset and load sample data |
 | `npm test` | Run the test suite |
 | `npm run ai:eval` | Evaluate the enquiry classifier |
-| `npm run images` | Regenerate the placeholder room images |
 
 ---
 
@@ -260,5 +259,5 @@ The tests use `TEST_DATABASE_URL`, which defaults to `postgresql://resort:resort
 - **Mocked in this build:** payments (MockPay), email and WhatsApp intake (use **Simulate incoming message** in the inbox), and confirmation emails.
 - **GST slabs** (5% up to ₹7,500 a night, 18% above) are an assumption. They're stored in the `tax_slabs` table and should be confirmed with the resort's CA.
 - **The classifier's test set** is small and was written by the developer, so its score is a smoke test, not a production accuracy figure. The safety rails (the unsorted lane, the complaint rule, re-route, human send) don't depend on it.
-- **Room images** are generated placeholders. Replace the files in `public/rooms/` under the same names.
+- **Photographs** are stand-ins collected from the web, with no licence cleared. Replace `public/hero.webp` and `public/rooms/*.webp` with the resort's own photos under the same names (and update their alt text in `src/components/site/photos.ts`) before any public launch.
 - **Rate limiting** is in memory, so it limits per server instance rather than across the whole deployment.

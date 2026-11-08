@@ -37,7 +37,7 @@ git clone <repo-url> resort-direct && cd resort-direct
 npm install
 
 # Postgres: use your own, or start one with Docker
-docker compose up -d
+docker compose up -d        # port 5432 taken? run: DB_PORT=5433 docker compose up -d, and use :5433 in DATABASE_URL
 
 cp .env.example .env
 # then set at least:

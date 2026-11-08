@@ -90,28 +90,17 @@ Checked on the production build with a fresh seed.
 - **No sideways scroll at 375px** on any page. Two causes fixed: a grid item stretched by a wide table, and screen-reader-only labels escaping a scroller.
 - **Without JavaScript:** the date search submits, the mobile menu opens, and check-out's minimum is rendered as check-in + 1. Pages no longer hang on a loading skeleton.
 - **Reduced motion:** the mist band is removed and the entrance rests.
-- **Lighthouse,** mobile, simulated slow 4G:
+- **Lighthouse,** mobile, simulated slow 4G, with the stand-in photographs:
 
   | Page | Performance | Accessibility | Best practices | SEO |
   | --- | --- | --- | --- | --- |
-  | Home | 92 (was 86) | 100 | 100 | 100 |
-  | Room page | 88 (was 96) | 100 | 100 | 91 |
+  | Home | 85 | 100 | 100 | 100 |
+  | Room page | 93 | 100 | 100 | 100 |
 
-  The room page now ships the gallery and lightbox script and 68 KB of fonts. SEO 91 is Next.js streaming the room's meta description outside `<head>` for browsers; crawlers get it in the head.
+  Home now carries about 690 KB, mostly photographs that `next/image` resizes for each screen.
 
-## Before and after
+## Photographs
 
-| Page | 375px | 1280px |
-| --- | --- | --- |
-| Home | [before](screenshots/before/mobile-01-home.jpg) / [after](screenshots/after/mobile-01-home.jpg) | [before](screenshots/before/desktop-01-home.jpg) / [after](screenshots/after/desktop-01-home.jpg) |
-| Room page | [before](screenshots/before/mobile-02-room.jpg) / [after](screenshots/after/mobile-02-room.jpg) | [before](screenshots/before/desktop-02-room.jpg) / [after](screenshots/after/desktop-02-room.jpg) |
-| Booking: details | [before](screenshots/before/mobile-03-book-details.jpg) / [after](screenshots/after/mobile-03-book-details.jpg) | [before](screenshots/before/desktop-03-book-details.jpg) / [after](screenshots/after/desktop-03-book-details.jpg) |
-| Booking: payment | [before](screenshots/before/mobile-04-book-pay.jpg) / [after](screenshots/after/mobile-04-book-pay.jpg) | [before](screenshots/before/desktop-04-book-pay.jpg) / [after](screenshots/after/desktop-04-book-pay.jpg) |
-| Confirmation | [before](screenshots/before/mobile-05-confirmation.jpg) / [after](screenshots/after/mobile-05-confirmation.jpg) | [before](screenshots/before/desktop-05-confirmation.jpg) / [after](screenshots/after/desktop-05-confirmation.jpg) |
-| Enquiry | [before](screenshots/before/mobile-06-enquire.jpg) / [after](screenshots/after/mobile-06-enquire.jpg) | [before](screenshots/before/desktop-06-enquire.jpg) / [after](screenshots/after/desktop-06-enquire.jpg) |
-| Privacy | [before](screenshots/before/mobile-07-privacy.jpg) / [after](screenshots/after/mobile-07-privacy.jpg) | [before](screenshots/before/desktop-07-privacy.jpg) / [after](screenshots/after/desktop-07-privacy.jpg) |
-| Staff sign-in | [before](screenshots/before/mobile-08-staff-login.jpg) / [after](screenshots/after/mobile-08-staff-login.jpg) | [before](screenshots/before/desktop-08-staff-login.jpg) / [after](screenshots/after/desktop-08-staff-login.jpg) |
-| Staff inbox | [before](screenshots/before/mobile-09-staff-inbox.jpg) / [after](screenshots/after/mobile-09-staff-inbox.jpg) | [before](screenshots/before/desktop-09-staff-inbox.jpg) / [after](screenshots/after/desktop-09-staff-inbox.jpg) |
-| Rates & allotment | [before](screenshots/before/mobile-10-staff-rates.jpg) / [after](screenshots/after/mobile-10-staff-rates.jpg) | [before](screenshots/before/desktop-10-staff-rates.jpg) / [after](screenshots/after/desktop-10-staff-rates.jpg) |
-| Promos & GST | [before](screenshots/before/mobile-11-staff-promos.jpg) / [after](screenshots/after/mobile-11-staff-promos.jpg) | [before](screenshots/before/desktop-11-staff-promos.jpg) / [after](screenshots/after/desktop-11-staff-promos.jpg) |
-| Bookings | [before](screenshots/before/mobile-12-staff-bookings.jpg) / [after](screenshots/after/mobile-12-staff-bookings.jpg) | [before](screenshots/before/desktop-12-staff-bookings.jpg) / [after](screenshots/after/desktop-12-staff-bookings.jpg) |
+The illustrations were replaced by stand-in photographs, all portrait. That changed the hero to a split: the canopy panel with the booking sentence on the left, the photograph filling the right side (on a phone, the photograph sits above the panel). Room cards, the room gallery and the events picture use portrait frames, so no photo is stretched past its 736px source. Each photo has written alt text in `src/components/site/photos.ts`. The image cache was cut from a year to a day, so a photo replaced under the same name shows within a day.
+
+The before and after screenshots from the redesign are in the git history (commit a27dbef). They were removed once the stand-in photographs replaced the illustrations.
