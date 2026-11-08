@@ -5,6 +5,8 @@ A booking website and staff workspace for a 76-key coffee-estate resort in Chikk
 Built for Isocode Labs, Problem 5: "Hill resort's direct-booking website with AI enquiry routing".
 
 - **Live app:** https://resort-direct-6hjk.vercel.app
+- **Admin Login:** [https://resort-direct-6hjk.vercel.app
+](https://resort-direct-6hjk.vercel.app/staff/login)
 - **Repository:** https://github.com/abhisheksouw21/Isocode_labs
 - **Deployment, demo logins and environment variables:** [`deployment.md`](./deployment.md)
 - **Design decisions, data model, assumptions and limits:** [`docs/TDD.md`](./docs/TDD.md)
