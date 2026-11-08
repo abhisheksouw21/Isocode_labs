@@ -1,7 +1,7 @@
 import { and, asc, eq, gte, lt, sql } from "drizzle-orm";
 import { db, schema } from "@/db";
-import { addDays, nightsBetween, weekday } from "./dates";
-import { AppError } from "./errors";
+import { addDays, isIsoDate, nightsBetween, weekday } from "./dates";
+import { AppError, isUniqueViolation, violatedConstraint } from "./errors";
 
 export async function inventoryGrid(from: string, days: number) {
   const to = addDays(from, days);
@@ -32,6 +32,7 @@ export type InventoryPatch = {
  * readable message listing the nights that blocked the change.
  */
 export async function updateInventory(p: InventoryPatch) {
+  if (!isIsoDate(p.from) || !isIsoDate(p.to)) throw new AppError("BAD_RANGE", "Use valid dates");
   if (p.to < p.from) throw new AppError("BAD_RANGE", "End date is before start date");
   if (nightsBetween(p.from, p.to) > 366) throw new AppError("BAD_RANGE", "Edit up to a year at a time");
   const [room] = await db.select().from(schema.roomTypes).where(eq(schema.roomTypes.id, p.roomTypeId));
@@ -43,6 +44,7 @@ export async function updateInventory(p: InventoryPatch) {
   const dates: string[] = [];
   for (let d = p.from; d <= p.to; d = addDays(d, 1)) if (!p.weekdays?.length || p.weekdays.includes(weekday(d))) dates.push(d);
   if (!dates.length) throw new AppError("BAD_RANGE", "No dates match the selected weekdays");
+  const pgDates = `{${dates.join(",")}}`;
 
   const set: Record<string, unknown> = { updatedAt: new Date() };
   if (p.rate !== undefined) set.rate = p.rate;
@@ -52,7 +54,7 @@ export async function updateInventory(p: InventoryPatch) {
   if (p.allotment !== undefined) {
     const blocking = await db.execute<{ date: string; taken: number }>(sql`
       SELECT date::text, sold + held AS taken FROM inventory
-      WHERE room_type_id = ${p.roomTypeId} AND date = ANY(${dates}::date[]) AND sold + held > ${p.allotment}
+      WHERE room_type_id = ${p.roomTypeId} AND date = ANY(${pgDates}::date[]) AND sold + held > ${p.allotment}
       ORDER BY date LIMIT 5`);
     if (blocking.rows.length)
       throw new AppError(
@@ -66,10 +68,10 @@ export async function updateInventory(p: InventoryPatch) {
     const res = await db
       .update(schema.inventory)
       .set(set)
-      .where(and(eq(schema.inventory.roomTypeId, p.roomTypeId), sql`${schema.inventory.date} = ANY(${dates}::date[])`));
+      .where(and(eq(schema.inventory.roomTypeId, p.roomTypeId), sql`${schema.inventory.date} = ANY(${pgDates}::date[])`));
     return { updated: res.rowCount ?? 0 };
   } catch (err) {
-    if (String((err as { message?: string }).message).includes("inventory_never_oversold"))
+    if (violatedConstraint(err) === "inventory_never_oversold")
       throw new AppError("ALLOTMENT_BELOW_SOLD", "A booking landed while you were editing. Reload and try again.", 409);
     throw err;
   }
@@ -85,7 +87,7 @@ export async function createPromo(p: { code: string; percentOff: number; minNigh
     const [row] = await db.insert(schema.promoCodes).values({ ...p, code: p.code.toUpperCase() }).returning();
     return row;
   } catch (err) {
-    if (String((err as { message?: string }).message).includes("duplicate")) throw new AppError("DUPLICATE", "That code already exists", 409);
+    if (isUniqueViolation(err)) throw new AppError("DUPLICATE", "That code already exists", 409);
     throw err;
   }
 }
