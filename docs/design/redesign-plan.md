@@ -79,3 +79,39 @@ phone: sticky bar  [Call] [WhatsApp] [Book a room]
 - Mobile: a full-screen menu that works without JavaScript (`<details>`). On the booking page, a collapsed summary at the top and a sticky total plus Continue.
 - Per-field errors linked with `aria-describedby`. The hold countdown announces only at 5 min, 2 min, 1 min, 30 s and 0.
 - Checked at 375px and 1280px.
+
+
+## Results
+
+Checked on the production build with a fresh seed.
+
+- **Typecheck, lint, tests and build:** all pass. 28 of 28 tests pass. `src/lib`, `src/db`, `src/app/api`, `tests` and `scripts` are unchanged.
+- **axe-core** (WCAG 2.1 AA plus best practice): no violations on any guest or staff page, at 375px and 1280px.
+- **No sideways scroll at 375px** on any page. Two causes fixed: a grid item stretched by a wide table, and screen-reader-only labels escaping a scroller.
+- **Without JavaScript:** the date search submits, the mobile menu opens, and check-out's minimum is rendered as check-in + 1. Pages no longer hang on a loading skeleton.
+- **Reduced motion:** the mist band is removed and the entrance rests.
+- **Lighthouse,** mobile, simulated slow 4G:
+
+  | Page | Performance | Accessibility | Best practices | SEO |
+  | --- | --- | --- | --- | --- |
+  | Home | 92 (was 86) | 100 | 100 | 100 |
+  | Room page | 88 (was 96) | 100 | 100 | 91 |
+
+  The room page now ships the gallery and lightbox script and 68 KB of fonts. SEO 91 is Next.js streaming the room's meta description outside `<head>` for browsers; crawlers get it in the head.
+
+## Before and after
+
+| Page | 375px | 1280px |
+| --- | --- | --- |
+| Home | [before](screenshots/before/mobile-01-home.jpg) / [after](screenshots/after/mobile-01-home.jpg) | [before](screenshots/before/desktop-01-home.jpg) / [after](screenshots/after/desktop-01-home.jpg) |
+| Room page | [before](screenshots/before/mobile-02-room.jpg) / [after](screenshots/after/mobile-02-room.jpg) | [before](screenshots/before/desktop-02-room.jpg) / [after](screenshots/after/desktop-02-room.jpg) |
+| Booking: details | [before](screenshots/before/mobile-03-book-details.jpg) / [after](screenshots/after/mobile-03-book-details.jpg) | [before](screenshots/before/desktop-03-book-details.jpg) / [after](screenshots/after/desktop-03-book-details.jpg) |
+| Booking: payment | [before](screenshots/before/mobile-04-book-pay.jpg) / [after](screenshots/after/mobile-04-book-pay.jpg) | [before](screenshots/before/desktop-04-book-pay.jpg) / [after](screenshots/after/desktop-04-book-pay.jpg) |
+| Confirmation | [before](screenshots/before/mobile-05-confirmation.jpg) / [after](screenshots/after/mobile-05-confirmation.jpg) | [before](screenshots/before/desktop-05-confirmation.jpg) / [after](screenshots/after/desktop-05-confirmation.jpg) |
+| Enquiry | [before](screenshots/before/mobile-06-enquire.jpg) / [after](screenshots/after/mobile-06-enquire.jpg) | [before](screenshots/before/desktop-06-enquire.jpg) / [after](screenshots/after/desktop-06-enquire.jpg) |
+| Privacy | [before](screenshots/before/mobile-07-privacy.jpg) / [after](screenshots/after/mobile-07-privacy.jpg) | [before](screenshots/before/desktop-07-privacy.jpg) / [after](screenshots/after/desktop-07-privacy.jpg) |
+| Staff sign-in | [before](screenshots/before/mobile-08-staff-login.jpg) / [after](screenshots/after/mobile-08-staff-login.jpg) | [before](screenshots/before/desktop-08-staff-login.jpg) / [after](screenshots/after/desktop-08-staff-login.jpg) |
+| Staff inbox | [before](screenshots/before/mobile-09-staff-inbox.jpg) / [after](screenshots/after/mobile-09-staff-inbox.jpg) | [before](screenshots/before/desktop-09-staff-inbox.jpg) / [after](screenshots/after/desktop-09-staff-inbox.jpg) |
+| Rates & allotment | [before](screenshots/before/mobile-10-staff-rates.jpg) / [after](screenshots/after/mobile-10-staff-rates.jpg) | [before](screenshots/before/desktop-10-staff-rates.jpg) / [after](screenshots/after/desktop-10-staff-rates.jpg) |
+| Promos & GST | [before](screenshots/before/mobile-11-staff-promos.jpg) / [after](screenshots/after/mobile-11-staff-promos.jpg) | [before](screenshots/before/desktop-11-staff-promos.jpg) / [after](screenshots/after/desktop-11-staff-promos.jpg) |
+| Bookings | [before](screenshots/before/mobile-12-staff-bookings.jpg) / [after](screenshots/after/mobile-12-staff-bookings.jpg) | [before](screenshots/before/desktop-12-staff-bookings.jpg) / [after](screenshots/after/desktop-12-staff-bookings.jpg) |
